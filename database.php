@@ -19,6 +19,3 @@ class Database {
     }
 }
 
-$teste = new Database('localhost', '3306', 'unisale', 'kleber', 'root');
-
-$teste->getDb();
