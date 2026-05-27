@@ -5,10 +5,10 @@ class Database {
 
     function __construct($host, $port, $dbname, $username, $password)
     {   
-        //Instanciamos uma classe PDO no atributo $db, passando os parâmetros de conexao 
+        //Instanciando uma classe PDO no atributo $db, passando os parâmetros de conexao 
         $this->db = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password );
 
-        //Forma que o pdo vai lidar com os erros
+        //Forma que o pdo vai lidar com os erros, nesse caso, lançando uma exceção quando ocorrer um erro de banco de dados
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
@@ -17,4 +17,6 @@ class Database {
     {
         return $this->db;
     }
+
 }
+
