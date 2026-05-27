@@ -27,6 +27,23 @@ class Usuario{
     public function getSenha(): string {
         return $this->senha;
     }
+
+    public function setId(int $id){
+        $this->id = $id;
+    }
+
+    public function setNome(string $nome){
+        $this->nome = $nome;
+    }
+
+    public function setLogin(string $login){
+        $this->login = $login;
+    }
+
+    public function setSenha(string $senha){
+        $this->senha = $senha;
+    }
+
 }
 
 ?>
