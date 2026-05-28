@@ -1,6 +1,7 @@
 
 <?php
-require_once "Database.php";
+require_once "../Database.php";
+require_once "../Usuario.php";
 
 class UsuarioModel {
     private $db;
@@ -31,6 +32,10 @@ class UsuarioModel {
         $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE id = :id");
         $stmt->execute([':id' => $id]);
 
+        //ao invés de criar um array associativo e usar os indices pra instanciar um objeto, esse método já instância automaticamente, sendo o unico requisito que os atributos sejam os mesmos que os da tabela do SQL
+        //Só que não deu certo por conta do construct da classe Usuario, que tem parametros obrigatórios, e o fetchObject não tem como passar os parametros pro construct, por isso, tive que usar o fetch associativo e ai instanciar manualmente o objeto
+        // return $usuario = $stmt->fetchObject("Usuario");
+        
         //FETCH_ASSOC retorna um array associativo, onde os indices são os nomes das colunas no banco. 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -55,6 +60,9 @@ class UsuarioModel {
         $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE login = :login");
         $stmt->execute([':login' => $login]);
 
+
+        
+        // return $usuario = $stmt->fetchObject("Usuario");
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data) {
@@ -63,4 +71,30 @@ class UsuarioModel {
             return null;
         }
     }
+
+    public function delete(int $id) {
+        $stmt = $this->db->prepare("DELETE FROM usuarios WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+    }
+
 }
+
+// $database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
+
+// $usuario = new Usuario(null, "Rafael", "rafael_santripa", "rafa#anoquenasci");
+
+// $model = new UsuarioModel($database);
+// $usuario = $model->getByLogin("kleber");
+// $senha = 123456; 
+
+// if($usuario->getLogin() == "kleber" && $usuario->getSenha() == $senha){
+//     echo "usuario autentico";
+// }else{
+//     echo "Usuario não autentico";
+// }
+// $model->create($usuario);
+
+// $usuarioDB = $model->getById(5);
+// var_dump($usuarioDB);
+
+
