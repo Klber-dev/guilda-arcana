@@ -47,13 +47,13 @@ class UsuarioModel {
     }
 
     public function update(Usuario $usuario){
-        $stmt = $this->db->prepare("UPDATE usuarios SET nome = :nome, login = :login, senha = :senha WHERE id = :id");
+        $stmt = $this->db->prepare("UPDATE usuarios SET nome = :nome, senha = :senha WHERE id = :id");
         $stmt->execute([
             ':nome' => $usuario->getNome(),
-            ':login' => $usuario->getLogin(),
             ':senha' => $usuario->getSenha(),
+            ':id' => $usuario->getId()
         ]);
-        
+    
     }
 
     public function getByLogin(string $login): ?Usuario {
