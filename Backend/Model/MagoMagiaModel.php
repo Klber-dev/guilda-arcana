@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../Config/autoload.php';
+// require_once __DIR__ . '/../Config/autoload.php';
 
 class MagoMagiaModel {
     private $db;
@@ -42,17 +42,17 @@ class MagoMagiaModel {
     }
 }
 
-$database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
+// $database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
 
-$magoModel = new MagoModel($database);
-$mago = $magoModel->getById(1);
+// $magoModel = new MagoModel($database);
+// $mago = $magoModel->getById(1);
 
-$magoMagiaModel = new MagoMagiaModel($database);
-$magoMagias = $magoMagiaModel->getMagiasdoMago($mago->getId());
-foreach ($magoMagias as $magia){
-    var_dump($magia);
-    echo "<br><hr>";
-}
+// $magoMagiaModel = new MagoMagiaModel($database);
+// $magoMagias = $magoMagiaModel->getMagiasdoMago($mago->getId());
+// foreach ($magoMagias as $magia){
+//     var_dump($magia);
+//     echo "<br><hr>";
+// }
 
 // $magoMagia = new MagoMagia(1, 1);
 // $magoMagiaModel->create($magoMagia);
