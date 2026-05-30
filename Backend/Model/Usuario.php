@@ -44,6 +44,13 @@ class Usuario{
         $this->senha = $senha;
     }
 
+    public function toArray(): array {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'login' => $this->login
+        ];
+    }
 }
 
 ?>
