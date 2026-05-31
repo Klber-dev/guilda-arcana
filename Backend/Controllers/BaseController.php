@@ -30,6 +30,7 @@ class BaseController {
         $usuarioLogado = $this->getSessionID();
         if (!$usuarioLogado) {
             $this->sendErrorResponse('Acesso negado. Faça login para continuar.');
+            exit;
         }
 
         return $usuarioLogado;
