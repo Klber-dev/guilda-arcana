@@ -2,20 +2,15 @@
 // header('Content-Type: application/json');
 // require_once __DIR__ . '/../Config/autoload.php';
 // require_once __DIR__ . '/../Config/database_config.php';
+
 // session_start();
 
-class UsuarioController
+class UsuarioController extends BaseController
 {
     private $usuarioModel;
 
     public function __construct(Database $database) {
         $this->usuarioModel = new UsuarioModel($database);
-    }
-
-
-    private function getJsonInput(){
-        //pega a entrada JSON e decodifica para um array associativo, se não tiver nada retorna um array vazio
-        return json_decode(file_get_contents('php://input'), true) ?? [];
     }
 
     public function cadastrarUsuario()
@@ -24,7 +19,7 @@ class UsuarioController
 
         //verifica se os campos necessários foram enviados
         if(!isset($data['nome']) || !isset($data['login']) || !isset($data['senha'])){
-            echo json_encode(['error' => 'Dados incompletos']);
+            $this->sendErrorResponse('Dados incompletos');
             return;
         } 
 
@@ -34,17 +29,14 @@ class UsuarioController
 
         // Verifica se o login já existe
         if ($this->usuarioModel->getByLogin($data['login'])){
-            echo json_encode(['error' => 'Login já existe']);
+            $this->sendErrorResponse('Login já existe');
             return;
         }
 
         // Salva o usuário no banco de dados
         $this->usuarioModel->create($usuario);
         $_SESSION['usuario_id'] = $usuario->getId(); // Armazena o ID do usuário na sessão
-        echo json_encode([
-            'message' => 'Usuário cadastrado com sucesso',
-            'usuario' => $usuario->toArray() //envia as informações para serem manipuladas no frontend 
-        ]);
+        $this->sendSuccessResponse('Usuário cadastrado com sucesso', $usuario->toArray());
     }
 
     public function autenticarUsuario()
@@ -53,18 +45,18 @@ class UsuarioController
 
         //verifica se chegou as informações
         if(!isset($data['login']) || !isset($data['senha'])){
-            echo json_encode(['error' => 'Dados incompletos']);
+            $this->sendErrorResponse('Dados incompletos');
             return;
         } 
 
         // Busca o usuário pelo login e verifica a senha
         $usuario = $this->usuarioModel->getByLogin($data['login']);
         if (!$usuario || $usuario->getSenha() !== md5($data['senha'])) {
-            echo json_encode(['error' => 'Login ou senha inválidos']);
+            $this->sendErrorResponse('Login ou senha inválidos');
             return;
         }
         $_SESSION['usuario_id'] = $usuario->getId(); // Armazena o ID do usuário na sessão
-        echo json_encode(['message' => 'Login bem sucedido', 'usuario' => $usuario->toArray()]);
+        $this->sendSuccessResponse('Login bem sucedido', $usuario->toArray());
     }
 
     public function atualizarPerfil()
@@ -72,7 +64,7 @@ class UsuarioController
         $data = $this->getJsonInput();
         $usuario = $this->usuarioModel->getById($_SESSION['usuario_id']);
         if (!$usuario) {
-            echo json_encode(['error' => 'Usuário não encontrado']);
+            $this->sendErrorResponse('Usuário não encontrado');
             return;
         }
 
@@ -83,7 +75,7 @@ class UsuarioController
             $usuario->setSenha(md5($data['senha']));
         }
         $this->usuarioModel->update($usuario);
-        echo json_encode(['message' => 'Perfil atualizado com sucesso', 'usuario' => $usuario->toArray()]);
+        $this->sendSuccessResponse('Perfil atualizado com sucesso', $usuario->toArray());
 
 
     }
@@ -93,11 +85,11 @@ class UsuarioController
         $data = $this->getJsonInput();
         $usuario = $this->usuarioModel->getById($_SESSION['usuario_id']);
         if (!$usuario) {
-            echo json_encode(['error' => 'Usuário não encontrado']);
+            $this->sendErrorResponse('Usuário não encontrado');
             return;
         }
         $this->usuarioModel->delete($_SESSION['usuario_id']);
-        echo json_encode(['message' => 'Usuário excluído com sucesso']);
+        $this->sendSuccessResponse('Usuário excluído com sucesso');
 
         unset($_SESSION['usuario_id']);
         session_destroy();
