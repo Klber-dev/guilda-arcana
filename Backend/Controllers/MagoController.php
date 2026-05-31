@@ -14,7 +14,7 @@ class MagoController extends BaseController {
     }
 
     public function criarMago(){
-        $this->exigirLogin();
+        $usuarioLogado = $this->exigirLogin();
         $data = $this->getJsonInput();
     
         if(!isset($data['nome']) || !isset($data['nivel'])){
@@ -22,12 +22,21 @@ class MagoController extends BaseController {
             return;
         }
 
-        $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
+        $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
             if (!$guilda) {
                 $this->sendErrorResponse('Guilda não encontrada');
                 return;
-            } 
+            }
+
+            if($guilda->getEspaco() <= 0){
+                $this->sendErrorResponse('Sua guilda não tem espaço para mais magos');
+                return;
+            }
+
         $mago = new Mago(null, $data['nome'], $data['nivel'], $guilda->getId());
+        $guilda->setEspaco($guilda->getEspaco() - 1);
+        $this->guildaModel->update($guilda);
+    
         $this->magoModel->create($mago);
         $this->sendSuccessResponse('Mago criado com sucesso', $mago->toArray());
     }
@@ -35,25 +44,50 @@ class MagoController extends BaseController {
     public function apagarMago(){
         $this->exigirLogin();
         $data = $this->getJsonInput();
+
+        
         if(!isset($data['id'])){
             $this->sendErrorResponse('Dados incompletos');
             return;
         }
 
+        $usuarioLogado = $this->getSessionID();
+        $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
         $mago = $this->magoModel->getById($data['id']);
-        if (!$mago) {
-            $this->sendErrorResponse('Mago não encontrado');
+
+        if(!$mago || $mago->getGuildaId() !== $guilda->getId()){
+            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda');
             return;
         }
-        
-        $this->magoModel->delete($mago->getId());
+
+        $this->magoModel->delete($data['id']);
+        $guilda->setEspaco($guilda->getEspaco() + 1);
+        $this->guildaModel->update($guilda);
         $this->sendSuccessResponse('Mago apagado com sucesso');
     }
+
+    public function getMagos(){
+        $usuarioLogado = $this->getSessionID();
+        $this->exigirLogin();
+        $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
+        if (!$guilda) {
+            $this->sendErrorResponse('Guilda não encontrada');
+            return;
+        }
+        $magos = $this->magoModel->getByGuildaId($guilda->getId());
+        $magosArray = [];
+        foreach($magos as $mago){
+            $magosArray[] = $mago->toArray();
+        }
+        $this->sendJsonResponse($magosArray);
+    }
+
 }
 
 //debug
 // $db = new Database(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS);
 // $magoController = new MagoController($db);
-// session_destroy();
-// //$magoController->criarMago();
-// $magoController->apagarMago();
+// $_SESSION['usuario_id'] = 1;
+// $magoController->getMagos();
+
+
