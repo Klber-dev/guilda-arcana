@@ -1,6 +1,7 @@
 <?php
 
-//require_once __DIR__ . '/../Config/autoload.php';
+// require_once __DIR__ . '/../Config/autoload.php';
+// require_once __DIR__ . '/../Config/database_config.php';
 
 class GuildaModel {
     private $db;
@@ -29,7 +30,7 @@ class GuildaModel {
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data) {
-            return new Guilda($data['id'], $data['nome'], $data['dinheiro'], $data['espaco'], $data['reputacao'], $data['usuario_id']);
+            return new Guilda($data['id'], $data['nome'], $data['usuario_id'], $data['dinheiro'], $data['espaco'], $data['reputacao']);
         } else {
             return null;
         }
@@ -60,7 +61,7 @@ class GuildaModel {
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data) {
-            return new Guilda($data['id'], $data['nome'], $data['dinheiro'], $data['espaco'], $data['reputacao'], $data['usuario_id']);
+            return new Guilda($data['id'], $data['nome'], $data['usuario_id'], $data['dinheiro'], $data['espaco'], $data['reputacao']);
         } else {
             return null;
         }
@@ -69,19 +70,19 @@ class GuildaModel {
 }
 
 
-// $database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
+
+
+// $database = new Database(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS);
 
 // $usuarioModel = new UsuarioModel($database);
-// $usuario = $usuarioModel->getById(1);
+// $usuario = $usuarioModel->getById(7);
 
 // var_dump($usuario);
 // echo "<br><hr>";
 
 // $guildaModel = new GuildaModel($database);
-// $guilda = new Guilda(null, "Galdérios", 100000, 10, 5, $usuario->getId());
-
+// $guilda = $guildaModel->getByUsuarioId($usuario->getId());
 // var_dump($guilda);
 // echo "<br><hr>";   
 
-// $guildaFromDb = $guildaModel->getByUsuarioId($usuario->getId());
-// var_dump($guildaFromDb);
+// echo json_encode($guilda->toArray());
