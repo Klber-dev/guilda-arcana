@@ -6,9 +6,9 @@ class Guilda{
     private int $dinheiro; //dinheiro int pq vou tratar como centavos
     private int $espaco;
     private int $reputacao;
-    private ?int $usuario_id;
+    private int $usuario_id;
 
-    public function __construct(?int $id, string $nome, int $dinheiro, int $espaco, int $reputacao, ?int $usuario_id = null) {
+    public function __construct(?int $id, string $nome, int $usuario_id, int $dinheiro = 0, int $espaco = 10, int $reputacao = 0) {
         $this->id = $id;
         $this->nome = $nome;
         $this->dinheiro = $dinheiro;
@@ -25,7 +25,7 @@ class Guilda{
         return $this->nome;
     }
 
-    public function getDinheiro(): string{
+    public function getDinheiro(): int{
         return $this->dinheiro;
     }
 
@@ -65,24 +65,14 @@ class Guilda{
         $this->usuario_id = $usuario_id;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+    public function toArray(): array {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'dinheiro' => $this->dinheiro,
+            'espaco' => $this->espaco,
+            'reputacao' => $this->reputacao,
+            'usuario_id' => $this->usuario_id
+        ];
+    }   
 }
