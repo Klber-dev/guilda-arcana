@@ -61,8 +61,9 @@ class UsuarioController extends BaseController
 
     public function atualizarPerfil()
     {
+        $usuarioLogado = $this->exigirLogin();
         $data = $this->getJsonInput();
-        $usuario = $this->usuarioModel->getById($_SESSION['usuario_id']);
+        $usuario = $this->usuarioModel->getById($usuarioLogado);
         if (!$usuario) {
             $this->sendErrorResponse('Usuário não encontrado');
             return;
@@ -82,13 +83,14 @@ class UsuarioController extends BaseController
 
     public function excluirUsuario()
     {
+        $usuarioLogado = $this->exigirLogin();
         $data = $this->getJsonInput();
-        $usuario = $this->usuarioModel->getById($_SESSION['usuario_id']);
+        $usuario = $this->usuarioModel->getById($usuarioLogado);
         if (!$usuario) {
             $this->sendErrorResponse('Usuário não encontrado');
             return;
         }
-        $this->usuarioModel->delete($_SESSION['usuario_id']);
+        $this->usuarioModel->delete($usuarioLogado);
         $this->sendSuccessResponse('Usuário excluído com sucesso');
 
         unset($_SESSION['usuario_id']);

@@ -17,7 +17,7 @@ class GuildaController extends BaseController {
     }
 
     public function criarGuilda(){
-        $this->exigirLogin(); 
+        $usuarioLogado = $this->exigirLogin();
         $data = $this->getJsonInput();
 
         if(!isset($data['nome'])){
@@ -25,7 +25,7 @@ class GuildaController extends BaseController {
             return;
         }
 
-        $guilda = new Guilda(null, $data['nome'], $this->getSessionID());
+        $guilda = new Guilda(null, $data['nome'], $usuarioLogado);
 
         $this->guildaModel->create($guilda);
 
@@ -33,8 +33,8 @@ class GuildaController extends BaseController {
     }
 
     public function getGuilda(){
-        $this->exigirLogin();
-        $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
+        $usuarioLogado = $this->exigirLogin();
+        $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
             $this->sendErrorResponse('Guilda não encontrada');
@@ -45,9 +45,9 @@ class GuildaController extends BaseController {
     }
 
     public function atualizarGuilda(){
-        $this->exigirLogin();
+        $usuarioLogado = $this->exigirLogin();
         $data = $this->getJsonInput();
-        $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
+        $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
             $this->sendErrorResponse('Guilda não encontrada');
@@ -73,8 +73,8 @@ class GuildaController extends BaseController {
     }
 
     public function excluirGuilda(){
-        $this->exigirLogin();
-        $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
+        $usuarioLogado = $this->exigirLogin();
+        $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
             $this->sendErrorResponse('Guilda não encontrada');
