@@ -17,6 +17,7 @@ class GuildaController extends BaseController {
     }
 
     public function criarGuilda(){
+        $this->exigirLogin(); 
         $data = $this->getJsonInput();
 
         if(!isset($data['nome'])){
@@ -32,6 +33,7 @@ class GuildaController extends BaseController {
     }
 
     public function getGuilda(){
+        $this->exigirLogin();
         $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
 
         if (!$guilda) {
@@ -43,6 +45,7 @@ class GuildaController extends BaseController {
     }
 
     public function atualizarGuilda(){
+        $this->exigirLogin();
         $data = $this->getJsonInput();
         $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
 
@@ -70,6 +73,7 @@ class GuildaController extends BaseController {
     }
 
     public function excluirGuilda(){
+        $this->exigirLogin();
         $guilda = $this->guildaModel->getByUsuarioId($this->getSessionID());
 
         if (!$guilda) {
