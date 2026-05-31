@@ -1,9 +1,9 @@
 <?php
 
-header('Content-Type: application/json');
-require_once __DIR__ . '/../Config/autoload.php';
-require_once __DIR__ . '/../Config/database_config.php';
-session_start();
+// header('Content-Type: application/json');
+// require_once __DIR__ . '/../Config/autoload.php';
+// require_once __DIR__ . '/../Config/database_config.php';
+// session_start();
 
 class GuildaController extends BaseController {
     private $guildaModel;
@@ -25,6 +25,7 @@ class GuildaController extends BaseController {
         }
 
         $guilda = new Guilda(null, $data['nome'], $this->getSessionID());
+
         $this->guildaModel->create($guilda);
 
         $this->sendSuccessResponse('Guilda criada com sucesso', $guilda->toArray());
@@ -82,6 +83,18 @@ class GuildaController extends BaseController {
     }
 
 }
+
+
+//debug
+// $db = new Database(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS);
+// $guildaController = new GuildaController($db);
+// $_SESSION['usuario_id'] = 7;
+
+//$guildaController->criarGuilda();
+//guildaController->atualizarGuilda();
+//$guildaController->getGuilda();
+//$guildaController->excluirGuilda();
+
 
 
 ?>
