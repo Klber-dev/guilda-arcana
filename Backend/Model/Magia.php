@@ -34,4 +34,12 @@ class Magia {
     public function setNivelMinimo(int $nivel_minimo): void {
         $this->nivel_minimo = $nivel_minimo;
     }
+
+    public function toArray(): array {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'nivel_minimo' => $this->nivel_minimo,
+        ];
+    }
 }

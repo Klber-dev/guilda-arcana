@@ -58,6 +58,15 @@ class MagiaModel{
             return null;
         }
     }
+
+    public function getAll(): array {
+        $stmt = $this->db->query("SELECT * FROM magias");
+        $magias = [];
+        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $magias[] = new Magia($data['id'], $data['nome'], $data['nivel_minimo']);
+        }
+        return $magias;
+    }
 }
 
 // $database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
