@@ -2,7 +2,6 @@
 // header('Content-Type: application/json');
 // require_once __DIR__ . '/../Config/autoload.php';
 // require_once __DIR__ . '/../Config/database_config.php';
-
 // session_start();
 
 class UsuarioController
@@ -22,34 +21,43 @@ class UsuarioController
     public function cadastrarUsuario()
     {
         $data = $this->getJsonInput();
+
+        //verifica se os campos necessários foram enviados
         if(!isset($data['nome']) || !isset($data['login']) || !isset($data['senha'])){
             echo json_encode(['error' => 'Dados incompletos']);
             return;
-        }
+        } 
 
+        // Cria um novo objeto Usuario com os dados recebidos
         $usuario = new Usuario(null, $data['nome'], $data['login'], md5($data['senha']));
         
+
+        // Verifica se o login já existe
         if ($this->usuarioModel->getByLogin($data['login'])){
             echo json_encode(['error' => 'Login já existe']);
             return;
         }
 
+        // Salva o usuário no banco de dados
         $this->usuarioModel->create($usuario);
         $_SESSION['usuario_id'] = $usuario->getId(); // Armazena o ID do usuário na sessão
         echo json_encode([
             'message' => 'Usuário cadastrado com sucesso',
-            'usuario' => $usuario->toArray() 
+            'usuario' => $usuario->toArray() //envia as informações para serem manipuladas no frontend 
         ]);
     }
 
     public function autenticarUsuario()
     {
         $data = $this->getJsonInput();
+
+        //verifica se chegou as informações
         if(!isset($data['login']) || !isset($data['senha'])){
             echo json_encode(['error' => 'Dados incompletos']);
             return;
-        }
+        } 
 
+        // Busca o usuário pelo login e verifica a senha
         $usuario = $this->usuarioModel->getByLogin($data['login']);
         if (!$usuario || $usuario->getSenha() !== md5($data['senha'])) {
             echo json_encode(['error' => 'Login ou senha inválidos']);
