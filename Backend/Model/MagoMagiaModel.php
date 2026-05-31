@@ -40,6 +40,22 @@ class MagoMagiaModel {
         }
         return $magias;
     }
+
+    public function getRelacao(int $mago_id, int $magia_id): ?MagoMagia {
+        $stmt = $this->db->prepare("SELECT * FROM mago_magias WHERE mago_id = :mago_id AND magia_id = :magia_id");
+        $stmt->execute([
+            ':mago_id' => $mago_id,
+            ':magia_id' => $magia_id
+        ]);
+
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($data) {
+            return new MagoMagia($data['mago_id'], $data['magia_id']);
+        } else {
+            return null;
+        }
+    }
 }
 
 // $database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
