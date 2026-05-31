@@ -10,7 +10,6 @@ $db = new Database(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS);
 
 $rota = $_GET['rota'] ?? '';
 $acao = $_GET['acao'] ?? '';
-$_SESSION['usuario_id'] = 1;
 
 switch ($rota) {
     case 'usuarios':
