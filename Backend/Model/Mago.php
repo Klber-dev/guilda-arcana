@@ -45,5 +45,11 @@ class Mago {
         $this->guilda_id = $guilda_id;
     }
 
-
+    public function toArray(): array {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'nivel' => $this->nivel,
+        ];
+    }
 }
