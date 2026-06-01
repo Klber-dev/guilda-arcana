@@ -1,9 +1,9 @@
-function Login() {
+function Cadastro() {
   return (
     <main>
-      <h1>Login</h1>
+      <h1>Cadastro</h1>
     </main>
   );
 }
 
-export default Login;
+export default Cadastro;
