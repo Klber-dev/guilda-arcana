@@ -100,7 +100,7 @@ function Login() {
             </div>
           </div>
 
-          <div className="relative z-10 rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5 text-purple-100/80">
+          <div className="relative z-10 mt-10 rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5 text-purple-100/80">
             <p className="font-serif text-lg">
               “O conhecimento é a mais estável das magias.”
             </p>
