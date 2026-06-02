@@ -7,6 +7,7 @@ import PerfilUsuario from "./pages/PerfilUsuario";
 import PerfilGuilda from "./pages/PerfilGuilda";
 import CadastroMago from "./pages/CadastroMago";
 import Spellbook from "./pages/Spellbook";
+import MagiaDetalhe from "./pages/MagiaDetalhe";
 import Sobre from "./pages/Sobre";
 
 function App() {
@@ -25,7 +26,9 @@ function App() {
       <Route path="/magos/cadastrar" element={<CadastroMago />} />
 
       <Route path="/spellbook" element={<Spellbook />} />
-      
+
+      <Route path="/spellbook/:index" element={<MagiaDetalhe />} />
+
       <Route path="/sobre" element={<Sobre />} />
     </Routes>
   );
