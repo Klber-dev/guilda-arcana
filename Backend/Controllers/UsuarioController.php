@@ -96,6 +96,12 @@ class UsuarioController extends BaseController
         unset($_SESSION['usuario_id']);
         session_destroy();
     }
+
+    public function logout(){
+        unset($_SESSION['usuario_id']);
+        session_destroy();
+        $this->sendSuccessResponse('Logout realizado com sucesso');
+    }
 }
 
 

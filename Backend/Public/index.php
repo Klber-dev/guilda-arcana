@@ -23,6 +23,8 @@ switch ($rota) {
             $controller->atualizarPerfil();
         } elseif ($acao === 'excluir') {
             $controller->excluirUsuario();
+        }elseif ($acao === 'logout') {
+            $controller->logout();
         }
         break;
 
