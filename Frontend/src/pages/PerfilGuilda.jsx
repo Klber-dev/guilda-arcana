@@ -158,6 +158,60 @@ function PerfilGuilda() {
     }
   }
 
+  async function atualizarNivelMago(id, nivel) {
+    setMensagem("");
+
+    if (!nivel || nivel < 1) {
+      setMensagem("O nível do mago precisa ser maior que zero.");
+      return;
+    }
+
+    try {
+      const response = await api.post("?rota=magos&acao=atualizarNivel", {
+        id,
+        nivel,
+      });
+
+      if (response.data.error) {
+        setMensagem(response.data.error);
+        return;
+      }
+
+      setMensagem(response.data.message || "Nível do mago atualizado com sucesso.");
+      await buscarMagos();
+    } catch (error) {
+      console.error(error);
+      setMensagem("Erro ao atualizar nível do mago.");
+    }
+  }
+
+  async function excluirMago(id) {
+    const confirmar = window.confirm("Tem certeza que deseja excluir este mago?");
+
+    if (!confirmar) {
+      return;
+    }
+
+    setMensagem("");
+
+    try {
+      const response = await api.post("?rota=magos&acao=apagar", {
+        id,
+      });
+
+      if (response.data.error) {
+        setMensagem(response.data.error);
+        return;
+      }
+
+      setMensagem(response.data.message || "Mago excluído com sucesso.");
+      await buscarGuilda();
+    } catch (error) {
+      console.error(error);
+      setMensagem("Erro ao excluir mago.");
+    }
+  }
+
   async function abrirMagiasDoMago(mago) {
     setModalMagiasAberto(true);
     setMagoDasMagias(mago);
@@ -213,11 +267,10 @@ function PerfilGuilda() {
     <main className="min-h-screen bg-[#07030f] text-white">
       <Header />
 
-      <section className="relative overflow-hidden px-6 py-12">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.28),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(88,28,135,0.35),_transparent_35%)]" />
-        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full border border-purple-400/10" />
-        <div className="absolute right-10 top-28 h-[520px] w-[520px] rounded-full border border-purple-300/10" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 bg-purple-700/20 blur-3xl" />
+      <section className="relative overflow-hidden px-6 py-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.24),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(88,28,135,0.32),_transparent_35%)]" />
+        <div className="absolute -left-40 top-20 h-96 w-96 rounded-full border border-purple-400/10" />
+        <div className="absolute right-12 top-28 h-[520px] w-[520px] rounded-full border border-purple-300/10" />
 
         <div className="relative z-10 mx-auto max-w-7xl">
           {!guilda ? (
@@ -225,7 +278,7 @@ function PerfilGuilda() {
               <div className="rounded-[1.5rem] border border-[#c8a978]/40 bg-[#efe6da] p-10 text-[#21172f]">
                 <div className="mb-8 text-center">
                   <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-[#c8a978]/60 bg-[#efe6da] text-4xl text-purple-700 shadow-md">
-                    ✦
+                    ◇
                   </div>
 
                   <p className="mb-4 text-sm font-semibold tracking-[0.35em] text-purple-700/70">
@@ -283,83 +336,122 @@ function PerfilGuilda() {
             </section>
           ) : (
             <>
-              <div className="mb-10">
-                <p className="mb-3 text-sm font-semibold tracking-[0.35em] text-purple-300/70">
-                  PAINEL DA GUILDA
-                </p>
+              <section className="mb-8 rounded-[2rem] border border-purple-300/20 bg-purple-950/35 p-8 shadow-2xl shadow-purple-950/40">
+                <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="mb-3 text-sm font-semibold tracking-[0.35em] text-purple-300/70">
+                      PAINEL DA GUILDA
+                    </p>
 
-                <h1 className="font-serif text-6xl text-[#f5e7c8] drop-shadow-[0_0_18px_rgba(216,180,254,0.35)]">
-                  {guilda.nome}
-                </h1>
+                    <h1 className="font-serif text-5xl text-[#f5e7c8] drop-shadow-[0_0_18px_rgba(216,180,254,0.25)]">
+                      {guilda.nome}
+                    </h1>
 
-                <p className="mt-4 max-w-3xl text-lg leading-relaxed text-purple-100/75">
-                  Gerencie os recursos da sua guilda, acompanhe seus magos e
-                  mantenha sua organização arcana em crescimento.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-                <section className="space-y-8">
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-6 shadow-xl shadow-purple-950/30">
-                      <p className="text-sm text-purple-200/60">Dinheiro</p>
-                      <p className="mt-2 font-serif text-4xl text-[#f5e7c8]">
-                        {guilda.dinheiro}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-6 shadow-xl shadow-purple-950/30">
-                      <p className="text-sm text-purple-200/60">Espaço</p>
-                      <p className="mt-2 font-serif text-4xl text-[#f5e7c8]">
-                        {guilda.espaco}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-6 shadow-xl shadow-purple-950/30">
-                      <p className="text-sm text-purple-200/60">Reputação</p>
-                      <p className="mt-2 font-serif text-4xl text-[#f5e7c8]">
-                        {guilda.reputacao}
-                      </p>
-                    </div>
+                    <p className="mt-4 max-w-3xl text-lg leading-relaxed text-purple-100/70">
+                      Gerencie seus recursos, acompanhe os membros da guilda e
+                      organize o crescimento dos seus magos.
+                    </p>
                   </div>
 
-                  <div className="rounded-[2rem] border border-purple-300/20 bg-purple-950/40 p-6 shadow-2xl shadow-purple-950/50">
-                    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold tracking-[0.25em] text-purple-300/70">
-                          MEMBROS DA GUILDA
-                        </p>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                  </div>
+                </div>
+              </section>
 
-                        <h2 className="mt-2 font-serif text-4xl text-[#f5e7c8]">
-                          Magos cadastrados
-                        </h2>
-                      </div>
+              {mensagem && (
+                <div className="mb-8 rounded-2xl border border-purple-300/30 bg-purple-100 px-5 py-4 text-center text-sm font-medium text-purple-900">
+                  {mensagem}
+                </div>
+              )}
 
-                      <Link
-                        to="/magos/cadastrar"
-                        className="rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-3 text-center font-serif text-sm tracking-[0.18em] text-[#f5e7c8] shadow-lg shadow-purple-900/30 transition hover:brightness-125"
-                      >
-                        NOVO MAGO
-                      </Link>
+              <section className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-purple-300/20 bg-[#12091f]/85 p-6 shadow-xl shadow-purple-950/30">
+                  <p className="text-sm uppercase tracking-[0.25em] text-purple-300/60">
+                    Cofre
+                  </p>
+                  <p className="mt-3 font-serif text-5xl text-[#f5e7c8]">
+                    {guilda.dinheiro}
+                  </p>
+                  <p className="mt-2 text-sm text-purple-100/50">
+                    Dinheiro disponível
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-purple-300/20 bg-[#12091f]/85 p-6 shadow-xl shadow-purple-950/30">
+                  <p className="text-sm uppercase tracking-[0.25em] text-purple-300/60">
+                    Espaço
+                  </p>
+                  <p className="mt-3 font-serif text-5xl text-[#f5e7c8]">
+                    {guilda.espaco}
+                  </p>
+                  <p className="mt-2 text-sm text-purple-100/50">
+                    Vagas restantes
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-purple-300/20 bg-[#12091f]/85 p-6 shadow-xl shadow-purple-950/30">
+                  <p className="text-sm uppercase tracking-[0.25em] text-purple-300/60">
+                    Prestígio
+                  </p>
+                  <p className="mt-3 font-serif text-5xl text-[#f5e7c8]">
+                    {guilda.reputacao}
+                  </p>
+                  <p className="mt-2 text-sm text-purple-100/50">
+                    Reputação pública
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-purple-300/20 bg-[#12091f]/85 p-6 shadow-xl shadow-purple-950/30">
+                  <p className="text-sm uppercase tracking-[0.25em] text-purple-300/60">
+                    Magos
+                  </p>
+                  <p className="mt-3 font-serif text-5xl text-[#f5e7c8]">
+                    {magos.length}
+                  </p>
+                  <p className="mt-2 text-sm text-purple-100/50">
+                    Membros cadastrados
+                  </p>
+                </div>
+              </section>
+
+              <section className="grid grid-cols-1 gap-8 xl:grid-cols-[1fr_380px]">
+                <div className="rounded-[2rem] border border-purple-300/20 bg-purple-950/35 p-6 shadow-2xl shadow-purple-950/40">
+                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold tracking-[0.25em] text-purple-300/70">
+                        MEMBROS
+                      </p>
+
+                      <h2 className="mt-2 font-serif text-4xl text-[#f5e7c8]">
+                        Magos da Guilda
+                      </h2>
                     </div>
 
-                    {magos.length === 0 ? (
-                      <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-8 text-center">
-                        <p className="font-serif text-2xl text-[#f5e7c8]">
-                          Nenhum mago cadastrado
-                        </p>
-                        <p className="mt-2 text-purple-100/60">
-                          Cadastre o primeiro mago da guilda para começar a
-                          organizar seus membros.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-4">
-                        {magos.map((mago) => (
-                          <div
-                            key={mago.id}
-                            className="flex flex-col gap-4 rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5 shadow-lg shadow-purple-950/20 sm:flex-row sm:items-center sm:justify-between"
-                          >
+                    <Link
+                      to="/magos/cadastrar"
+                      className="rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-3 text-center font-serif text-sm tracking-[0.18em] text-[#f5e7c8] shadow-lg shadow-purple-900/30 transition hover:brightness-125"
+                    >
+                      ADICIONAR
+                    </Link>
+                  </div>
+
+                  {magos.length === 0 ? (
+                    <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-10 text-center">
+                      <p className="font-serif text-3xl text-[#f5e7c8]">
+                        Nenhum mago cadastrado
+                      </p>
+                      <p className="mt-3 text-purple-100/60">
+                        Cadastre o primeiro membro para iniciar sua guilda.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {magos.map((mago) => (
+                        <div
+                          key={mago.id}
+                          className="rounded-2xl border border-purple-300/20 bg-[#0d0618]/80 p-5 shadow-lg shadow-purple-950/20"
+                        >
+                          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div className="flex items-center gap-4">
                               <div className="flex h-14 w-14 items-center justify-center rounded-full border border-purple-300/30 bg-purple-500/10 text-2xl text-purple-200">
                                 ✧
@@ -370,17 +462,13 @@ function PerfilGuilda() {
                                   {mago.nome}
                                 </h3>
 
-                                <p className="mt-1 text-sm text-purple-100/60">
-                                  Nível {mago.nivel}
+                                <p className="mt-1 text-sm text-purple-100/50">
+                                  ID #{mago.id} • Nível {mago.nivel}
                                 </p>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                              <span className="rounded-full border border-purple-300/20 bg-purple-900/40 px-4 py-2 text-sm text-purple-100/70">
-                                ID #{mago.id}
-                              </span>
-
+                            <div className="flex flex-wrap items-center gap-3">
                               <button
                                 type="button"
                                 onClick={() => abrirMagiasDoMago(mago)}
@@ -388,188 +476,192 @@ function PerfilGuilda() {
                               >
                                 Ver magias
                               </button>
+
+                              <button
+                                type="button"
+                                onClick={() => excluirMago(mago.id)}
+                                className="rounded-full border border-red-400/30 bg-red-950/30 px-4 py-2 text-sm text-red-100 transition hover:bg-red-900/40"
+                              >
+                                Excluir
+                              </button>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </section>
 
-                <aside className="space-y-8">
-                  <section className="rounded-[2rem] border border-purple-300/20 bg-purple-950/40 p-6 shadow-2xl shadow-purple-950/50">
-                    <div className="rounded-[1.5rem] border border-[#c8a978]/40 bg-[#efe6da] p-8 text-[#21172f]">
-                      <p className="mb-3 text-sm font-semibold tracking-[0.25em] text-purple-700/70">
-                        GERENCIAMENTO
-                      </p>
+                          <div className="mt-5 rounded-2xl border border-purple-300/10 bg-purple-950/30 p-4">
+                            <p className="mb-3 text-sm text-purple-200/60">
+                              Atualizar nível do mago
+                            </p>
 
-                      <h2 className="font-serif text-4xl text-[#20122f]">
-                        Editar Guilda
-                      </h2>
+                            <div className="flex flex-col gap-3 sm:flex-row">
+                              <input
+                                type="number"
+                                min="1"
+                                defaultValue={mago.nivel}
+                                id={`nivel-mago-${mago.id}`}
+                                className="w-full rounded-xl border border-purple-300/20 bg-purple-950/60 px-4 py-3 text-purple-50 outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/20 sm:w-32"
+                              />
 
-                      <p className="mt-3 text-[#6b5d75]">
-                        Atualize as informações principais da sua guilda.
-                      </p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const input = document.getElementById(
+                                    `nivel-mago-${mago.id}`
+                                  );
 
-                      <div className="my-7 h-px w-full bg-gradient-to-r from-[#c8a978] via-[#c8a978]/60 to-transparent" />
-
-                      <form onSubmit={atualizarGuilda} className="space-y-5">
-                        <div>
-                          <label
-                            htmlFor="nome"
-                            className="mb-2 block font-medium text-[#32243f]"
-                          >
-                            Nome
-                          </label>
-
-                          <input
-                            id="nome"
-                            type="text"
-                            value={guilda.nome}
-                            onChange={(event) =>
-                              setGuilda({
-                                ...guilda,
-                                nome: event.target.value,
-                              })
-                            }
-                            className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
-                          />
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor="dinheiro"
-                            className="mb-2 block font-medium text-[#32243f]"
-                          >
-                            Dinheiro
-                          </label>
-
-                          <input
-                            id="dinheiro"
-                            type="number"
-                            value={guilda.dinheiro}
-                            onChange={(event) =>
-                              setGuilda({
-                                ...guilda,
-                                dinheiro: Number(event.target.value),
-                              })
-                            }
-                            className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
-                          />
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor="espaco"
-                            className="mb-2 block font-medium text-[#32243f]"
-                          >
-                            Espaço
-                          </label>
-
-                          <input
-                            id="espaco"
-                            type="number"
-                            value={guilda.espaco}
-                            onChange={(event) =>
-                              setGuilda({
-                                ...guilda,
-                                espaco: Number(event.target.value),
-                              })
-                            }
-                            className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
-                          />
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor="reputacao"
-                            className="mb-2 block font-medium text-[#32243f]"
-                          >
-                            Reputação
-                          </label>
-
-                          <input
-                            id="reputacao"
-                            type="number"
-                            value={guilda.reputacao}
-                            onChange={(event) =>
-                              setGuilda({
-                                ...guilda,
-                                reputacao: Number(event.target.value),
-                              })
-                            }
-                            className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
-                          />
-                        </div>
-
-                        <button
-                          type="submit"
-                          className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.2em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125"
-                        >
-                          SALVAR
-                        </button>
-                      </form>
-
-                      <div className="mt-6 min-h-[56px]">
-                        {mensagem && (
-                          <div className="flex items-center justify-center rounded-xl border border-purple-300/40 bg-purple-100 px-4 py-3 text-center text-sm font-medium text-purple-900 shadow-sm">
-                            {mensagem}
+                                  atualizarNivelMago(
+                                    mago.id,
+                                    Number(input.value)
+                                  );
+                                }}
+                                className="rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-3 font-serif text-sm tracking-[0.15em] text-[#f5e7c8] transition hover:brightness-125"
+                              >
+                                Atualizar
+                              </button>
+                            </div>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  </section>
+                  )}
+                </div>
 
-                  <section className="rounded-[2rem] border border-purple-300/20 bg-purple-950/40 p-6 shadow-2xl shadow-purple-950/50">
-                    <p className="mb-3 text-sm font-semibold tracking-[0.25em] text-purple-300/70">
-                      AÇÕES RÁPIDAS
+                <aside className="space-y-6">
+                  <section className="rounded-[2rem] border border-[#c8a978]/40 bg-[#efe6da] p-6 text-[#21172f] shadow-2xl shadow-purple-950/40">
+                    <p className="mb-3 text-sm font-semibold tracking-[0.25em] text-purple-700/70">
+                      EDIÇÃO
                     </p>
 
-                    <h2 className="font-serif text-3xl text-[#f5e7c8]">
-                      Administração
+                    <h2 className="font-serif text-4xl text-[#20122f]">
+                      Dados da Guilda
                     </h2>
 
-                    <div className="mt-6 grid gap-4">
-                      <Link
-                        to="/magos/cadastrar"
-                        className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5 transition hover:bg-purple-900/50"
-                      >
-                        <p className="font-serif text-xl text-[#f5e7c8]">
-                          Cadastrar Mago
-                        </p>
-                        <p className="mt-2 text-sm text-purple-100/60">
-                          Adicione um novo membro à sua guilda.
-                        </p>
-                      </Link>
+                    <p className="mt-3 text-[#6b5d75]">
+                      Atualize os atributos principais da guilda.
+                    </p>
 
-                      <Link
-                        to="/spellbook"
-                        className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5 transition hover:bg-purple-900/50"
-                      >
-                        <p className="font-serif text-xl text-[#f5e7c8]">
-                          Abrir Spellbook
-                        </p>
-                        <p className="mt-2 text-sm text-purple-100/60">
-                          Consulte e gerencie magias dos magos.
-                        </p>
-                      </Link>
+                    <div className="my-7 h-px w-full bg-gradient-to-r from-[#c8a978] via-[#c8a978]/60 to-transparent" />
+
+                    <form onSubmit={atualizarGuilda} className="space-y-5">
+                      <div>
+                        <label
+                          htmlFor="nome"
+                          className="mb-2 block font-medium text-[#32243f]"
+                        >
+                          Nome
+                        </label>
+
+                        <input
+                          id="nome"
+                          type="text"
+                          value={guilda.nome}
+                          onChange={(event) =>
+                            setGuilda({
+                              ...guilda,
+                              nome: event.target.value,
+                            })
+                          }
+                          className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="dinheiro"
+                          className="mb-2 block font-medium text-[#32243f]"
+                        >
+                          Dinheiro
+                        </label>
+
+                        <input
+                          id="dinheiro"
+                          type="number"
+                          value={guilda.dinheiro}
+                          onChange={(event) =>
+                            setGuilda({
+                              ...guilda,
+                              dinheiro: Number(event.target.value),
+                            })
+                          }
+                          className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="espaco"
+                          className="mb-2 block font-medium text-[#32243f]"
+                        >
+                          Espaço
+                        </label>
+
+                        <input
+                          id="espaco"
+                          type="number"
+                          value={guilda.espaco}
+                          onChange={(event) =>
+                            setGuilda({
+                              ...guilda,
+                              espaco: Number(event.target.value),
+                            })
+                          }
+                          className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="reputacao"
+                          className="mb-2 block font-medium text-[#32243f]"
+                        >
+                          Reputação
+                        </label>
+
+                        <input
+                          id="reputacao"
+                          type="number"
+                          value={guilda.reputacao}
+                          onChange={(event) =>
+                            setGuilda({
+                              ...guilda,
+                              reputacao: Number(event.target.value),
+                            })
+                          }
+                          className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                        />
+                      </div>
 
                       <button
-                        type="button"
-                        onClick={excluirGuilda}
-                        className="rounded-2xl border border-red-400/30 bg-red-950/30 p-5 text-left transition hover:bg-red-900/40"
+                        type="submit"
+                        className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.2em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125"
                       >
-                        <p className="font-serif text-xl text-red-200">
-                          Excluir Guilda
-                        </p>
-                        <p className="mt-2 text-sm text-red-100/60">
-                          Remove a guilda e seus dados vinculados.
-                        </p>
+                        SALVAR
                       </button>
-                    </div>
+                    </form>
+                  </section>
+
+                  <section className="rounded-[2rem] border border-red-400/20 bg-red-950/20 p-6">
+                    <p className="mb-2 text-sm font-semibold tracking-[0.25em] text-red-200/70">
+                      ZONA DE PERIGO
+                    </p>
+
+                    <h3 className="font-serif text-2xl text-red-100">
+                      Excluir Guilda
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-relaxed text-red-100/60">
+                      Remove a guilda e todos os magos vinculados a ela.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={excluirGuilda}
+                      className="mt-5 w-full rounded-xl border border-red-400/30 bg-red-950/40 px-5 py-3 text-sm font-semibold text-red-100 transition hover:bg-red-900/50"
+                    >
+                      Excluir guilda
+                    </button>
                   </section>
                 </aside>
-              </div>
+              </section>
             </>
           )}
         </div>
