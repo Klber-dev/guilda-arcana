@@ -23,7 +23,7 @@ switch ($rota) {
             $controller->atualizarPerfil();
         } elseif ($acao === 'excluir') {
             $controller->excluirUsuario();
-        }elseif ($acao === 'logout') {
+        } elseif ($acao === 'logout') {
             $controller->logout();
         }
         break;
@@ -51,6 +51,8 @@ switch ($rota) {
             $controller->getMagos();
         } elseif ($acao === 'apagar') {
             $controller->apagarMago();
+        } elseif ($acao === 'atualizarNivel') {
+            $controller->atualizarNivelMago();
         }
         break;
 

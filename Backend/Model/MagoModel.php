@@ -2,14 +2,17 @@
 
 // require_once __DIR__ . '/../Config/autoload.php';
 
-class MagoModel{
+class MagoModel
+{
     private $db;
 
-    public function __construct(Database $database) {
+    public function __construct(Database $database)
+    {
         $this->db = $database->getDb(); //conexão com o banco aqui
     }
 
-    public function create (Mago $mago) {
+    public function create(Mago $mago)
+    {
         $stmt = $this->db->prepare("INSERT INTO magos (nome, nivel, guilda_id) VALUES (:nome, :nivel, :guilda_id)");
         $stmt->execute([
             ':nome' => $mago->getNome(),
@@ -17,10 +20,11 @@ class MagoModel{
             ':guilda_id' => $mago->getGuildaId()
         ]);
 
-        $mago->setId($this->db->lastInsertId()); 
+        $mago->setId($this->db->lastInsertId());
     }
 
-    public function getById(int $id): ?Mago {
+    public function getById(int $id): ?Mago
+    {
         $stmt = $this->db->prepare("SELECT * FROM magos WHERE id = :id");
         $stmt->execute([':id' => $id]);
 
@@ -32,24 +36,25 @@ class MagoModel{
             return null;
         }
     }
+    public function updateNivel(int $id, int $nivel)
+    {
+        $stmt = $this->db->prepare("UPDATE magos SET nivel = :nivel WHERE id = :id");
 
-    public function update(Mago $mago){
-        $stmt = $this->db->prepare("UPDATE magos SET nome = :nome, nivel = :nivel, guilda_id = :guilda_id WHERE id = :id");
         $stmt->execute([
-            ':nome' => $mago->getNome(),
-            ':nivel' => $mago->getNivel(),
-            ':guilda_id' => $mago->getGuildaId(),
-            ':id' => $mago->getId()
+            ':nivel' => $nivel,
+            ':id' => $id
         ]);
     }
 
-    public function delete(int $id) {
+    public function delete(int $id)
+    {
         $stmt = $this->db->prepare("DELETE FROM magos WHERE id = :id");
         $stmt->execute([':id' => $id]);
     }
 
     // Retorna todos magos da guilda 
-    public function getByGuildaId(int $guilda_id): array {
+    public function getByGuildaId(int $guilda_id): array
+    {
         $stmt = $this->db->prepare("SELECT * FROM magos WHERE guilda_id = :guilda_id");
         $stmt->execute([':guilda_id' => $guilda_id]);
 
@@ -60,7 +65,6 @@ class MagoModel{
 
         return $magos;
     }
-
 }
 
 // $database = new Database("127.0.0.1", "3306", "guilda_arcana", "kleber", "root");
@@ -78,5 +82,3 @@ class MagoModel{
 //     var_dump($mago);
 //     echo "<br><hr>";
 // }
-
-?>
