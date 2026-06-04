@@ -53,7 +53,7 @@ O projeto reúne uma série de conhecimentos que acumulei ao decorrer dos meus e
 
 *Notei que caso o banco de dados venha a quebrar, o backend atual não da nenhum feedback e acaba quebrando o funcionamento do site de forma silenciosa.*
 
-##Autor
+## Autor
 Desenvolvido por **Kleber**.
 
   
