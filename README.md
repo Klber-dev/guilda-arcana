@@ -11,7 +11,7 @@ A proposta do sistema é permitir a criação de uma guilda e gerenciar seus mag
 - Acesso a informações da guilda e do usuário
 - Fácil comunicação entre front e Backend
 
-##Ferramentas utilizadas:
+## Ferramentas utilizadas:
 - PHP
 - PDO
 - MariaDB
@@ -22,13 +22,13 @@ A proposta do sistema é permitir a criação de uma guilda e gerenciar seus mag
 ## Estrutura do projeto
 O projeto arranha a superficie do que seria o padrão MVC, onde separo por pastas e funções cada parte do código afim de evitar uma sobrecarga de responsabilidades *( apesar de continuar sendo um ponto com possibilidade de melhoria )*
 
-`Backend/Controllers/` Responsáveis por receber ações do usuário, aplicar regras de negócio e controlar o fluxo
-`Backend/models/` Aqui as tabelas do banco de dados viram uma classe no model, comunicam-se com o banco de dados e aplicam regras relacionais
-`Backend/Public/` Roteamento e tomada de decisão de qual ação deve ser executada
-`Backend/Config/` Conexão com banco de dados e headers
-`Frontend/` Páginas de exibição do usuário e consumo da API
+- `Backend/Controllers/` Responsáveis por receber ações do usuário, aplicar regras de negócio e controlar o fluxo
+- `Backend/models/` Aqui as tabelas do banco de dados viram uma classe no model, comunicam-se com o banco de dados e aplicam regras relacionais
+- `Backend/Public/` Roteamento e tomada de decisão de qual ação deve ser executada
+- `Backend/Config/` Conexão com banco de dados e headers
+- `Frontend/` Páginas de exibição do usuário e consumo da API
 
-##Banco de dados
+## Banco de dados
 O sistema utiliza o banco de dados chamado de guilda_arcana, que conta com as seguintes tabelas:
 - Usuarios
 - Guildas
@@ -41,7 +41,7 @@ Com a estrutura do banco de dados feita, o projeto já pode ser executado, desde
 #Objetivo
 O projeto reúne uma série de conhecimentos que acumulei ao decorrer dos meus estudos, utilizando POO, PHP, banco de dados relacionais e organização em camadas
 
-##Defeitos que já notei e o que melhorar
+## Defeitos que já notei e o que melhorar
 - necessário validação mais completa nos formulários
 - Criptografia de senha ( foi utilizado md5 )
 - Sistema de permissões
@@ -51,7 +51,7 @@ O projeto reúne uma série de conhecimentos que acumulei ao decorrer dos meus e
 - Melhor organização das rotas
 - Sobrecarga de responsabilidades no controller
 
-*Notei que caso o banco de dados venha a quebrar, o backend atual não da nenhum feedback e acaba quebrando o funcionamento do site de forma silenciosa. *
+*Notei que caso o banco de dados venha a quebrar, o backend atual não da nenhum feedback e acaba quebrando o funcionamento do site de forma silenciosa.*
 
 ##Autor
 Desenvolvido por **Kleber**.
