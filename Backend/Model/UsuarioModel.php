@@ -3,11 +3,9 @@
 //require_once "../Database.php";
 // require_once "../Usuario.php";
 
-class UsuarioModel {
-    private $db;
-
+class UsuarioModel extends BaseModel {
     public function __construct(Database $database) {
-        $this->db = $database->getDb();
+        parent::__construct($database);
     }
 
 

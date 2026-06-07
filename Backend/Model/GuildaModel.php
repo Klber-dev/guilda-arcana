@@ -3,11 +3,10 @@
 // require_once __DIR__ . '/../Config/autoload.php';
 // require_once __DIR__ . '/../Config/database_config.php';
 
-class GuildaModel {
-    private $db;
+class GuildaModel extends BaseModel {
 
     public function __construct(Database $database) {
-        $this->db = $database->getDb(); //conexão com o banco aqui
+        parent::__construct($database);
     }
 
     public function create (Guilda $guilda) {

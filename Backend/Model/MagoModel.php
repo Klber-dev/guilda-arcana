@@ -2,13 +2,11 @@
 
 // require_once __DIR__ . '/../Config/autoload.php';
 
-class MagoModel
+class MagoModel extends BaseModel
 {
-    private $db;
-
     public function __construct(Database $database)
     {
-        $this->db = $database->getDb(); //conexão com o banco aqui
+        parent::__construct($database);
     }
 
     public function create(Mago $mago)
