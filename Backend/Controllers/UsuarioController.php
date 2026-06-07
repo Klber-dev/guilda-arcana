@@ -116,6 +116,6 @@ class UsuarioController extends BaseController
 // $_SESSION['usuario_id'] = 8;
 // $usuarioController->excluirUsuario();
 
-
+#Está é uma nova branch
 
 ?>
