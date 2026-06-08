@@ -8,8 +8,7 @@ class MagiaModel extends BaseModel {
     }
 
     public function create (Magia $magia) {
-        $stmt = $this->db->prepare("INSERT INTO magias (nome, nivel_minimo) VALUES (:nome, :nivel_minimo)");
-        $stmt->execute([
+        $stmt = $this->query("INSERT INTO magias (nome, nivel_minimo) VALUES (:nome, :nivel_minimo)", [
             ':nome' => $magia->getNome(),
             ':nivel_minimo' => $magia->getNivelMinimo()
         ]);
@@ -18,8 +17,7 @@ class MagiaModel extends BaseModel {
     }
 
     public function getByName(string $nome): ?Magia {
-        $stmt = $this->db->prepare("SELECT * FROM magias WHERE nome = :nome");
-        $stmt->execute([':nome' => $nome]);
+        $stmt = $this->query("SELECT * FROM magias WHERE nome = :nome", [':nome' => $nome]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -31,8 +29,7 @@ class MagiaModel extends BaseModel {
     }
 
     public function update(Magia $magia){
-        $stmt = $this->db->prepare("UPDATE magias SET nome = :nome, nivel_minimo = :nivel_minimo WHERE id = :id");
-        $stmt->execute([
+        $this->query("UPDATE magias SET nome = :nome, nivel_minimo = :nivel_minimo WHERE id = :id", [
             ':nome' => $magia->getNome(),
             ':nivel_minimo' => $magia->getNivelMinimo(),
             ':id' => $magia->getId()
@@ -40,13 +37,11 @@ class MagiaModel extends BaseModel {
     }
 
     public function delete(int $id) {
-        $stmt = $this->db->prepare("DELETE FROM magias WHERE id = :id");
-        $stmt->execute([':id' => $id]);
+        $this->query("DELETE FROM magias WHERE id = :id", [':id' => $id]);
     }
 
     public function getById(int $id): ?Magia {
-        $stmt = $this->db->prepare("SELECT * FROM magias WHERE id = :id");
-        $stmt->execute([':id' => $id]);
+        $stmt = $this->query("SELECT * FROM magias WHERE id = :id", [':id' => $id]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -58,7 +53,7 @@ class MagiaModel extends BaseModel {
     }
 
     public function getAll(): array {
-        $stmt = $this->db->query("SELECT * FROM magias");
+        $stmt = $this->query("SELECT * FROM magias");
         $magias = [];
         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $magias[] = new Magia($data['id'], $data['nome'], $data['nivel_minimo']);

@@ -1,1 +1,3 @@
-Config/database_config.php
+config.env
+.env
+

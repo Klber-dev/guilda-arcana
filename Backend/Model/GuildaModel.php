@@ -10,21 +10,19 @@ class GuildaModel extends BaseModel {
     }
 
     public function create (Guilda $guilda) {
-        $stmt = $this->db->prepare("INSERT INTO guildas (nome, dinheiro, espaco, reputacao, usuario_id) VALUES (:nome, :dinheiro, :espaco, :reputacao, :usuario_id)");
-        $stmt->execute([
+        $this->query("INSERT INTO guildas (nome, usuario_id, dinheiro, espaco, reputacao) VALUES (:nome, :usuario_id, :dinheiro, :espaco, :reputacao)", [
             ':nome' => $guilda->getNome(),
+            ':usuario_id' => $guilda->getUsuarioId(),
             ':dinheiro' => $guilda->getDinheiro(),
             ':espaco' => $guilda->getEspaco(),
-            ':reputacao' => $guilda->getReputacao(),
-            ':usuario_id' => $guilda->getUsuarioId()
+            ':reputacao' => $guilda->getReputacao()
         ]);
 
         $guilda->setId($this->db->lastInsertId()); //por algum motivo mágico ele funciona mesmo se acontecer duas inserções seguidas, porque o lastInsertId é específico pra cada conexão, zika
     }
 
     public function getById(int $id): ?Guilda {
-        $stmt = $this->db->prepare("SELECT * FROM guildas WHERE id = :id");
-        $stmt->execute([':id' => $id]);
+        $stmt = $this->query("SELECT * FROM guildas WHERE id = :id", [':id' => $id]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -36,8 +34,7 @@ class GuildaModel extends BaseModel {
     }
 
     public function update(Guilda $guilda){
-        $stmt = $this->db->prepare("UPDATE guildas SET nome = :nome, dinheiro = :dinheiro, espaco = :espaco, reputacao = :reputacao, usuario_id = :usuario_id WHERE id = :id");
-        $stmt->execute([
+        $this->query("UPDATE guildas SET nome = :nome, dinheiro = :dinheiro, espaco = :espaco, reputacao = :reputacao, usuario_id = :usuario_id WHERE id = :id", [
             ':nome' => $guilda->getNome(),
             ':dinheiro' => $guilda->getDinheiro(),
             ':espaco' => $guilda->getEspaco(),
@@ -48,14 +45,12 @@ class GuildaModel extends BaseModel {
     }
 
     public function delete(int $id) {
-        $stmt = $this->db->prepare("DELETE FROM guildas WHERE id = :id");
-        $stmt->execute([':id' => $id]);
+        $this->query("DELETE FROM guildas WHERE id = :id", [':id' => $id]);
     }
 
 
     public function getByUsuarioId(int $usuario_id): ?Guilda {
-        $stmt = $this->db->prepare("SELECT * FROM guildas WHERE usuario_id = :usuario_id");
-        $stmt->execute([':usuario_id' => $usuario_id]); // basta dar um getId no usuario e passar o id dele aqui que ele vai retornar a guilda do usuario, ou null se o usuario não tiver guilda
+        $stmt = $this->query("SELECT * FROM guildas WHERE usuario_id = :usuario_id", [':usuario_id' => $usuario_id]); // basta dar um getId no usuario e passar o id dele aqui que ele vai retornar a guilda do usuario, ou null se o usuario não tiver guilda
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
