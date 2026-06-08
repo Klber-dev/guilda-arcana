@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import api from "../services/api";
+import {
+  getApiErrorMessage,
+  isAuthError,
+} from "../services/handleApiError";
 
 function PerfilUsuario() {
   const navigate = useNavigate();
@@ -12,19 +16,35 @@ function PerfilUsuario() {
   const [nome, setNome] = useState(usuarioInicial?.nome || "");
   const [login] = useState(usuarioInicial?.login || "");
   const [novaSenha, setNovaSenha] = useState("");
+
   const [mensagem, setMensagem] = useState("");
+  const [tipoMensagem, setTipoMensagem] = useState("");
+  const [carregandoAcao, setCarregandoAcao] = useState("");
+
+  useEffect(() => {
+    if (!usuarioInicial) {
+      navigate("/login");
+    }
+  }, [usuarioInicial, navigate]);
+
+  function mostrarMensagem(texto, tipo = "error") {
+    setMensagem(texto);
+    setTipoMensagem(tipo);
+  }
 
   async function atualizarPerfil(event) {
     event.preventDefault();
-    setMensagem("");
 
-    if (!nome) {
-      setMensagem("Informe seu nome.");
+    setMensagem("");
+    setTipoMensagem("");
+
+    if (!nome.trim()) {
+      mostrarMensagem("Informe seu nome.");
       return;
     }
 
     const dados = {
-      nome,
+      nome: nome.trim(),
     };
 
     if (novaSenha) {
@@ -32,25 +52,36 @@ function PerfilUsuario() {
     }
 
     try {
-      const response = await api.post("?rota=usuarios&acao=atualizar", dados);
+      setCarregandoAcao("atualizarPerfil");
 
-      if (response.data.error) {
-        setMensagem(response.data.error);
-        return;
-      }
+      const response = await api.post("?rota=usuarios&acao=atualizar", dados);
 
       const usuarioAtualizado = {
         ...usuarioInicial,
-        nome,
+        nome: nome.trim(),
         login,
       };
 
       localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+      setNome(nome.trim());
       setNovaSenha("");
-      setMensagem(response.data.message || "Perfil atualizado com sucesso.");
+
+      mostrarMensagem(
+        response.data.message || "Perfil atualizado com sucesso.",
+        "success"
+      );
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao atualizar perfil.");
+      console.error("Erro ao atualizar perfil:", error);
+
+      if (isAuthError(error)) {
+        localStorage.removeItem("usuario");
+        navigate("/login");
+        return;
+      }
+
+      mostrarMensagem(getApiErrorMessage(error, "Erro ao atualizar perfil."));
+    } finally {
+      setCarregandoAcao("");
     }
   }
 
@@ -63,19 +94,28 @@ function PerfilUsuario() {
       return;
     }
 
-    try {
-      const response = await api.post("?rota=usuarios&acao=excluir");
+    setMensagem("");
+    setTipoMensagem("");
 
-      if (response.data.error) {
-        setMensagem(response.data.error);
-        return;
-      }
+    try {
+      setCarregandoAcao("excluirConta");
+
+      await api.post("?rota=usuarios&acao=excluir");
 
       localStorage.removeItem("usuario");
       navigate("/");
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao excluir conta.");
+      console.error("Erro ao excluir conta:", error);
+
+      if (isAuthError(error)) {
+        localStorage.removeItem("usuario");
+        navigate("/login");
+        return;
+      }
+
+      mostrarMensagem(getApiErrorMessage(error, "Erro ao excluir conta."));
+    } finally {
+      setCarregandoAcao("");
     }
   }
 
@@ -151,7 +191,8 @@ function PerfilUsuario() {
               <button
                 type="button"
                 onClick={sair}
-                className="mt-8 w-full rounded-xl border border-purple-300/30 bg-purple-950/40 px-5 py-4 font-serif tracking-[0.18em] text-purple-100 transition hover:bg-purple-900/50"
+                disabled={Boolean(carregandoAcao)}
+                className="mt-8 w-full rounded-xl border border-purple-300/30 bg-purple-950/40 px-5 py-4 font-serif tracking-[0.18em] text-purple-100 transition hover:bg-purple-900/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 SAIR DA CONTA
               </button>
@@ -187,7 +228,8 @@ function PerfilUsuario() {
                       type="text"
                       value={nome}
                       onChange={(event) => setNome(event.target.value)}
-                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                      disabled={Boolean(carregandoAcao)}
+                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                     />
                   </div>
 
@@ -222,21 +264,34 @@ function PerfilUsuario() {
                       value={novaSenha}
                       onChange={(event) => setNovaSenha(event.target.value)}
                       placeholder="Deixe vazio para manter a senha atual"
-                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                      disabled={Boolean(carregandoAcao)}
+                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.2em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125"
+                    disabled={Boolean(carregandoAcao)}
+                    className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.2em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100"
                   >
-                    SALVAR PERFIL
+                    {carregandoAcao === "atualizarPerfil"
+                      ? "SALVANDO..."
+                      : "SALVAR PERFIL"}
                   </button>
                 </form>
 
                 <div className="mt-6 min-h-[56px]">
                   {mensagem && (
-                    <div className="flex items-center justify-center rounded-xl border border-purple-300/40 bg-purple-100 px-4 py-3 text-center text-sm font-medium text-purple-900 shadow-sm">
+                    <div
+                      className={`flex items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-medium shadow-sm ${
+                        tipoMensagem === "success"
+                          ? "border-green-400/60 bg-green-100 text-green-800"
+                          : "border-red-400/60 bg-red-100 text-red-800"
+                      }`}
+                    >
+                      <span className="mr-2">
+                        {tipoMensagem === "success" ? "✓" : "⚠"}
+                      </span>
                       {mensagem}
                     </div>
                   )}
@@ -250,9 +305,12 @@ function PerfilUsuario() {
                   <button
                     type="button"
                     onClick={excluirConta}
-                    className="w-full rounded-xl border border-red-400/50 bg-red-100 px-5 py-4 font-semibold text-red-800 transition hover:bg-red-200"
+                    disabled={Boolean(carregandoAcao)}
+                    className="w-full rounded-xl border border-red-400/50 bg-red-100 px-5 py-4 font-semibold text-red-800 transition hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Excluir conta
+                    {carregandoAcao === "excluirConta"
+                      ? "Excluindo..."
+                      : "Excluir conta"}
                   </button>
                 </div>
               </div>

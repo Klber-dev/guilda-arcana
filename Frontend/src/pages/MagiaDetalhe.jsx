@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import dndApi from "../services/dndApi";
 import api from "../services/api";
+import {
+  getApiErrorMessage,
+  isAuthError,
+} from "../services/handleApiError";
 
 function MagiaDetalhe() {
   const { index } = useParams();
+  const navigate = useNavigate();
 
   const [magia, setMagia] = useState(null);
   const [magos, setMagos] = useState([]);
   const [magoSelecionado, setMagoSelecionado] = useState("");
+
   const [carregando, setCarregando] = useState(true);
+  const [carregandoAcao, setCarregandoAcao] = useState(false);
+
   const [mensagem, setMensagem] = useState("");
   const [mensagemAcao, setMensagemAcao] = useState("");
+  const [tipoMensagemAcao, setTipoMensagemAcao] = useState("");
+
   const [modalAberto, setModalAberto] = useState(false);
 
   useEffect(() => {
@@ -34,30 +44,40 @@ function MagiaDetalhe() {
           setMagos([]);
         }
       } catch (error) {
-        console.error(error);
-        setMensagem("Erro ao carregar detalhes da magia.");
+        console.error("Erro ao carregar detalhes da magia:", error);
+
+        if (isAuthError(error)) {
+          navigate("/login");
+          return;
+        }
+
+        setMensagem(
+          getApiErrorMessage(error, "Erro ao carregar detalhes da magia.")
+        );
       } finally {
         setCarregando(false);
       }
     }
 
     carregarDados();
-  }, [index]);
+  }, [index, navigate]);
 
   function abrirModal() {
     setMensagemAcao("");
+    setTipoMensagemAcao("");
     setMagoSelecionado("");
     setModalAberto(true);
   }
 
   function fecharModal() {
+    if (carregandoAcao) {
+      return;
+    }
+
     setModalAberto(false);
     setMensagemAcao("");
+    setTipoMensagemAcao("");
     setMagoSelecionado("");
-  }
-
-  function mensagemSucesso(texto) {
-    return texto.toLowerCase().includes("sucesso");
   }
 
   function magoPodeAprender(mago) {
@@ -66,13 +86,33 @@ function MagiaDetalhe() {
 
   async function aprenderMagia() {
     setMensagemAcao("");
+    setTipoMensagemAcao("");
 
     if (!magoSelecionado) {
       setMensagemAcao("Selecione um mago antes de aprender a magia.");
+      setTipoMensagemAcao("error");
+      return;
+    }
+
+    const magoEscolhido = magos.find(
+      (mago) => String(mago.id) === String(magoSelecionado)
+    );
+
+    if (!magoEscolhido) {
+      setMensagemAcao("Mago selecionado não encontrado.");
+      setTipoMensagemAcao("error");
+      return;
+    }
+
+    if (!magoPodeAprender(magoEscolhido)) {
+      setMensagemAcao("Este mago não possui nível suficiente para aprender esta magia.");
+      setTipoMensagemAcao("error");
       return;
     }
 
     try {
+      setCarregandoAcao(true);
+
       const response = await api.post("?rota=mago-magias&acao=aprender", {
         mago_id: Number(magoSelecionado),
         magia_index: magia.index,
@@ -80,15 +120,20 @@ function MagiaDetalhe() {
         nivel_minimo: magia.level,
       });
 
-      if (response.data.error) {
-        setMensagemAcao(response.data.error);
+      setMensagemAcao(response.data.message || "Magia aprendida com sucesso.");
+      setTipoMensagemAcao("success");
+    } catch (error) {
+      console.error("Erro ao aprender magia:", error);
+
+      if (isAuthError(error)) {
+        navigate("/login");
         return;
       }
 
-      setMensagemAcao(response.data.message || "Magia aprendida com sucesso.");
-    } catch (error) {
-      console.error(error);
-      setMensagemAcao("Erro ao aprender magia.");
+      setMensagemAcao(getApiErrorMessage(error, "Erro ao aprender magia."));
+      setTipoMensagemAcao("error");
+    } finally {
+      setCarregandoAcao(false);
     }
   }
 
@@ -112,8 +157,15 @@ function MagiaDetalhe() {
         <Header />
 
         <section className="flex min-h-[calc(100vh-84px)] items-center justify-center px-6">
-          <div className="rounded-2xl border border-red-400/40 bg-red-100 px-8 py-6 text-red-800 shadow-2xl shadow-purple-950/50">
-            {mensagem || "Magia não encontrada."}
+          <div className="max-w-xl rounded-2xl border border-red-400/40 bg-red-100 px-8 py-6 text-center text-red-800 shadow-2xl shadow-purple-950/50">
+            <p>{mensagem || "Magia não encontrada."}</p>
+
+            <Link
+              to="/spellbook"
+              className="mt-4 inline-block font-semibold text-red-900 underline"
+            >
+              Voltar ao Spellbook
+            </Link>
           </div>
         </section>
       </main>
@@ -351,7 +403,8 @@ function MagiaDetalhe() {
                 <button
                   type="button"
                   onClick={fecharModal}
-                  className="rounded-full border border-[#c8a978]/50 px-4 py-2 text-purple-800 transition hover:bg-purple-100"
+                  disabled={carregandoAcao}
+                  className="rounded-full border border-[#c8a978]/50 px-4 py-2 text-purple-800 transition hover:bg-purple-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   X
                 </button>
@@ -369,8 +422,9 @@ function MagiaDetalhe() {
                     <button
                       key={mago.id}
                       type="button"
+                      disabled={carregandoAcao}
                       onClick={() => setMagoSelecionado(String(mago.id))}
-                      className={`w-full rounded-2xl border p-4 text-left transition ${
+                      className={`w-full rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-70 ${
                         magoSelecionado === String(mago.id)
                           ? "border-purple-700 bg-purple-100"
                           : "border-[#c8a978]/40 bg-white/50 hover:bg-purple-50"
@@ -406,13 +460,13 @@ function MagiaDetalhe() {
                 {mensagemAcao && (
                   <div
                     className={`flex items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-medium shadow-sm ${
-                      mensagemSucesso(mensagemAcao)
+                      tipoMensagemAcao === "success"
                         ? "border-green-400/60 bg-green-100 text-green-800"
                         : "border-red-400/60 bg-red-100 text-red-800"
                     }`}
                   >
                     <span className="mr-2">
-                      {mensagemSucesso(mensagemAcao) ? "✓" : "⚠"}
+                      {tipoMensagemAcao === "success" ? "✓" : "⚠"}
                     </span>
                     {mensagemAcao}
                   </div>
@@ -423,16 +477,17 @@ function MagiaDetalhe() {
                 <button
                   type="button"
                   onClick={aprenderMagia}
-                  disabled={magos.length === 0}
-                  className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-3 font-serif text-sm tracking-[0.18em] text-[#f5e7c8] shadow-lg shadow-purple-900/20 transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={magos.length === 0 || carregandoAcao}
+                  className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-3 font-serif text-sm tracking-[0.18em] text-[#f5e7c8] shadow-lg shadow-purple-900/20 transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:brightness-100"
                 >
-                  CONFIRMAR
+                  {carregandoAcao ? "ENSINANDO..." : "CONFIRMAR"}
                 </button>
 
                 <button
                   type="button"
                   onClick={fecharModal}
-                  className="w-full rounded-xl border border-purple-300/40 bg-white/40 px-5 py-3 font-serif text-sm tracking-[0.18em] text-purple-900 transition hover:bg-purple-100"
+                  disabled={carregandoAcao}
+                  className="w-full rounded-xl border border-purple-300/40 bg-white/40 px-5 py-3 font-serif text-sm tracking-[0.18em] text-purple-900 transition hover:bg-purple-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   CANCELAR
                 </button>

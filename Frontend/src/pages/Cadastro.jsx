@@ -10,42 +10,81 @@ function Cadastro() {
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+
   const [mensagem, setMensagem] = useState("");
+  const [tipoMensagem, setTipoMensagem] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setMensagem("");
 
-    if (!nome || !login || !senha || !confirmarSenha) {
+    setMensagem("");
+    setTipoMensagem("");
+
+    if (!nome.trim() || !login.trim() || !senha || !confirmarSenha) {
       setMensagem("Preencha todos os campos.");
+      setTipoMensagem("error");
       return;
     }
 
     if (senha !== confirmarSenha) {
       setMensagem("As senhas não coincidem.");
+      setTipoMensagem("error");
       return;
     }
 
     try {
+      setCarregando(true);
+
       const response = await api.post("?rota=usuarios&acao=cadastrar", {
-        nome,
-        login,
+        nome: nome.trim(),
+        login: login.trim(),
         senha,
       });
 
-      if (response.data.error) {
-        setMensagem(response.data.error);
-        return;
-      }
-
-      setMensagem(response.data.message);
+      setMensagem(response.data.message || "Cadastro realizado com sucesso.");
+      setTipoMensagem("success");
 
       setTimeout(() => {
         navigate("/login");
       }, 1200);
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao conectar com o servidor.");
+      console.error("Erro no cadastro:", error);
+
+      if (error.debug) {
+        console.error("Debug do backend:", error.debug);
+      }
+
+      if (error.type === "validation") {
+        setMensagem(error.message || "Verifique os dados informados.");
+        setTipoMensagem("error");
+        return;
+      }
+
+      if (error.type === "conflict") {
+        setMensagem(error.message || "Este cadastro já existe.");
+        setTipoMensagem("error");
+        return;
+      }
+
+      if (error.type === "database" || error.status === 500) {
+        setMensagem(
+          "O sistema encontrou um problema interno. Tente novamente mais tarde."
+        );
+        setTipoMensagem("error");
+        return;
+      }
+
+      if (error.type === "network") {
+        setMensagem("Não foi possível se comunicar com o servidor.");
+        setTipoMensagem("error");
+        return;
+      }
+
+      setMensagem(error.message || "Erro ao realizar cadastro.");
+      setTipoMensagem("error");
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -165,7 +204,8 @@ function Cadastro() {
                     value={nome}
                     onChange={(event) => setNome(event.target.value)}
                     placeholder="Digite seu nome"
-                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -183,7 +223,8 @@ function Cadastro() {
                     value={login}
                     onChange={(event) => setLogin(event.target.value)}
                     placeholder="Escolha um login"
-                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -201,7 +242,8 @@ function Cadastro() {
                     value={senha}
                     onChange={(event) => setSenha(event.target.value)}
                     placeholder="Crie uma senha"
-                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -221,15 +263,17 @@ function Cadastro() {
                       setConfirmarSenha(event.target.value)
                     }
                     placeholder="Confirme sua senha"
-                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="mt-4 w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.25em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125"
+                  disabled={carregando}
+                  className="mt-4 w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.25em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100"
                 >
-                  CRIAR CONTA
+                  {carregando ? "CRIANDO..." : "CRIAR CONTA"}
                 </button>
               </form>
 
@@ -237,13 +281,13 @@ function Cadastro() {
                 {mensagem && (
                   <div
                     className={`flex items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-medium shadow-sm ${
-                      mensagem.includes("sucesso")
+                      tipoMensagem === "success"
                         ? "border-green-400/60 bg-green-100 text-green-800"
                         : "border-red-400/60 bg-red-100 text-red-800"
                     }`}
                   >
                     <span className="mr-2">
-                      {mensagem.includes("sucesso") ? "✓" : "⚠"}
+                      {tipoMensagem === "success" ? "✓" : "⚠"}
                     </span>
                     {mensagem}
                   </div>

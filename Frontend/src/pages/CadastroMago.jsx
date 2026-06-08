@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import api from "../services/api";
+import {
+  getApiErrorMessage,
+  isAuthError,
+} from "../services/handleApiError";
 
 function CadastroMago() {
   const navigate = useNavigate();
@@ -9,28 +13,40 @@ function CadastroMago() {
   const [nome, setNome] = useState("");
   const [nivel, setNivel] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [tipoMensagem, setTipoMensagem] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
   async function cadastrarMago(event) {
     event.preventDefault();
-    setMensagem("");
 
-    if (!nome || !nivel) {
+    setMensagem("");
+    setTipoMensagem("");
+
+    if (!nome.trim() || !nivel) {
       setMensagem("Preencha todos os campos.");
+      setTipoMensagem("error");
+      return;
+    }
+
+    const nivelConvertido = Number(nivel);
+
+    if (Number.isNaN(nivelConvertido) || nivelConvertido < 1) {
+      setMensagem("Informe um nível válido para o mago.");
+      setTipoMensagem("error");
       return;
     }
 
     try {
+      setCarregando(true);
+
       const response = await api.post("?rota=magos&acao=criar", {
-        nome,
-        nivel: Number(nivel),
+        nome: nome.trim(),
+        nivel: nivelConvertido,
       });
 
-      if (response.data.error) {
-        setMensagem(response.data.error);
-        return;
-      }
-
       setMensagem(response.data.message || "Mago cadastrado com sucesso.");
+      setTipoMensagem("success");
+
       setNome("");
       setNivel("");
 
@@ -38,8 +54,16 @@ function CadastroMago() {
         navigate("/guilda");
       }, 1000);
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao cadastrar mago.");
+      console.error("Erro ao cadastrar mago:", error);
+
+      if (isAuthError(error)) {
+        navigate("/login");
+        return;
+      }
+
+      setMensagem(getApiErrorMessage(error, "Erro ao cadastrar mago."));
+      setTipoMensagem("error");
+      setCarregando(false);
     }
   }
 
@@ -106,18 +130,14 @@ function CadastroMago() {
                 </div>
 
                 <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5">
-                  <p className="font-serif text-xl text-[#f5e7c8]">
-                    Nível
-                  </p>
+                  <p className="font-serif text-xl text-[#f5e7c8]">Nível</p>
                   <p className="mt-2 text-sm text-purple-100/60">
                     Define quais magias o mago poderá aprender.
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-purple-300/20 bg-purple-950/40 p-5">
-                  <p className="font-serif text-xl text-[#f5e7c8]">
-                    Guilda
-                  </p>
+                  <p className="font-serif text-xl text-[#f5e7c8]">Guilda</p>
                   <p className="mt-2 text-sm text-purple-100/60">
                     O sistema vincula o mago automaticamente à sua guilda.
                   </p>
@@ -156,7 +176,8 @@ function CadastroMago() {
                       value={nome}
                       onChange={(event) => setNome(event.target.value)}
                       placeholder="Ex: Merlin"
-                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                      disabled={carregando}
+                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                     />
                   </div>
 
@@ -171,19 +192,21 @@ function CadastroMago() {
                     <input
                       id="nivel"
                       type="number"
-                      min="0"
+                      min="1"
                       value={nivel}
                       onChange={(event) => setNivel(event.target.value)}
                       placeholder="Ex: 5"
-                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                      disabled={carregando}
+                      className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.2em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.2em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100"
                   >
-                    CADASTRAR MAGO
+                    {carregando ? "CADASTRANDO..." : "CADASTRAR MAGO"}
                   </button>
                 </form>
 
@@ -191,13 +214,13 @@ function CadastroMago() {
                   {mensagem && (
                     <div
                       className={`flex items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-medium shadow-sm ${
-                        mensagem.includes("sucesso")
+                        tipoMensagem === "success"
                           ? "border-green-400/60 bg-green-100 text-green-800"
                           : "border-red-400/60 bg-red-100 text-red-800"
                       }`}
                     >
                       <span className="mr-2">
-                        {mensagem.includes("sucesso") ? "✓" : "⚠"}
+                        {tipoMensagem === "success" ? "✓" : "⚠"}
                       </span>
                       {mensagem}
                     </div>

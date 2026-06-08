@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import AuthHeader from "../components/AuthHeader";
+import { getApiErrorMessage } from "../services/handleApiError";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,21 +10,25 @@ function Login() {
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     setMensagem("");
 
+    if (!login.trim() || !senha) {
+      setMensagem("Preencha login e senha.");
+      return;
+    }
+
     try {
+      setCarregando(true);
+
       const response = await api.post("?rota=usuarios&acao=login", {
-        login,
+        login: login.trim(),
         senha,
       });
-
-      if (response.data.error) {
-        setMensagem(response.data.error);
-        return;
-      }
 
       if (response.data.data) {
         localStorage.setItem("usuario", JSON.stringify(response.data.data));
@@ -31,8 +36,11 @@ function Login() {
 
       navigate("/guilda");
     } catch (error) {
-      console.error(error);
-      setMensagem("Erro ao conectar com o servidor.");
+      console.error("Erro no login:", error);
+
+      setMensagem(getApiErrorMessage(error, "Erro ao realizar login."));
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -154,7 +162,8 @@ function Login() {
                     value={login}
                     onChange={(event) => setLogin(event.target.value)}
                     placeholder="Digite seu login"
-                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -172,15 +181,17 @@ function Login() {
                     value={senha}
                     onChange={(event) => setSenha(event.target.value)}
                     placeholder="Digite sua senha"
-                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30"
+                    disabled={carregando}
+                    className="w-full rounded-xl border border-[#cbbfd4] bg-white/70 px-5 py-4 text-[#20122f] outline-none transition placeholder:text-[#9b8fa7] focus:border-purple-500 focus:ring-4 focus:ring-purple-300/30 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="mt-4 w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.25em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125"
+                  disabled={carregando}
+                  className="mt-4 w-full rounded-xl border border-[#c8a978] bg-gradient-to-r from-purple-950 via-purple-800 to-purple-950 px-5 py-4 font-serif text-lg tracking-[0.25em] text-[#f5e7c8] shadow-xl shadow-purple-900/30 transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100"
                 >
-                  ENTRAR NA GUILDA
+                  {carregando ? "ENTRANDO..." : "ENTRAR NA GUILDA"}
                 </button>
               </form>
 
