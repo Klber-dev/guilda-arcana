@@ -24,7 +24,7 @@ class UsuarioController extends BaseController
         } 
 
         // Cria um novo objeto Usuario com os dados recebidos
-        $usuario = new Usuario(null, $data['nome'], $data['login'], md5($data['senha']));
+        $usuario = new Usuario(null, $data['nome'], $data['login'], password_hash($data['senha'], PASSWORD_DEFAULT));
         
 
         // Verifica se o login já existe
@@ -51,7 +51,7 @@ class UsuarioController extends BaseController
 
         // Busca o usuário pelo login e verifica a senha
         $usuario = $this->usuarioModel->getByLogin($data['login']);
-        if (!$usuario || $usuario->getSenha() !== md5($data['senha'])) {
+        if (!$usuario || !password_verify($data['senha'], $usuario->getSenha())) {
             $this->sendErrorResponse('Login ou senha inválidos');
             return;
         }
@@ -73,7 +73,7 @@ class UsuarioController extends BaseController
             $usuario->setNome($data['nome']);
         }
         if (isset($data['senha'])) {
-            $usuario->setSenha(md5($data['senha']));
+            $usuario->setSenha(password_hash($data['senha'], PASSWORD_DEFAULT));
         }
         $this->usuarioModel->update($usuario);
         $this->sendSuccessResponse('Perfil atualizado com sucesso', $usuario->toArray());
