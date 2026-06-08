@@ -12,10 +12,6 @@ class GuildaController extends BaseController {
         $this->guildaModel = new GuildaModel($database);
     }
 
-    public function getJsonInput() {
-        return json_decode(file_get_contents('php://input'), true) ?? [];
-    }
-
     public function criarGuilda(){
         $usuarioLogado = $this->exigirLogin();
         $data = $this->getJsonInput();
