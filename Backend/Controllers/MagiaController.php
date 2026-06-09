@@ -19,13 +19,13 @@ class MagiaController extends BaseController {
             return;
         }
         if ($this->magiaModel->getByName($data['nome'])) {
-            $this->sendErrorResponse('Magia com esse nome já existe');
+            $this->sendErrorResponse('Magia com esse nome já existe', 409);
             return;
         }
 
         $magia = new Magia(null, $data['nome'], $data['nivel']);
         $this->magiaModel->create($magia);
-        $this->sendSuccessResponse('Magia criada com sucesso', $magia->toArray());
+        $this->sendSuccessResponse('Magia criada com sucesso', $magia->toArray(), 201);
     }
 
     public function listarMagias(){
@@ -45,7 +45,7 @@ class MagiaController extends BaseController {
         }
         $magia = $this->magiaModel->getByName($data['nome']);
         if (!$magia) {
-            $this->sendErrorResponse('Magia não encontrada');
+            $this->sendErrorResponse('Magia não encontrada', 404);
             return;
         }
         $this->sendJsonResponse($magia->toArray());

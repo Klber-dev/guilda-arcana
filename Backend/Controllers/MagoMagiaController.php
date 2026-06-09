@@ -36,14 +36,14 @@ class MagoMagiaController extends BaseController
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
 
         $mago = $this->magoModel->getById((int) $data['mago_id']);
 
         if (!$mago || $mago->getGuildaId() !== $guilda->getId()) {
-            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda');
+            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda', 404);
             return;
         }
 
@@ -60,7 +60,7 @@ class MagoMagiaController extends BaseController
         }
 
         if ($mago->getNivel() < $magia->getNivelMinimo()) {
-            $this->sendErrorResponse('Mago não tem nível suficiente para aprender essa magia');
+            $this->sendErrorResponse('Mago não tem nível suficiente para aprender essa magia', 403);
             return;
         }
 
@@ -70,7 +70,7 @@ class MagoMagiaController extends BaseController
         );
 
         if ($magoMagiaExistente) {
-            $this->sendErrorResponse('Mago já aprendeu essa magia');
+            $this->sendErrorResponse('Mago já aprendeu essa magia', 409);
             return;
         }
 
@@ -81,7 +81,7 @@ class MagoMagiaController extends BaseController
 
         $this->magoMagiaModel->create($magoMagia);
 
-        $this->sendSuccessResponse('Magia aprendida com sucesso');
+        $this->sendSuccessResponse('Magia aprendida com sucesso', null, 201);
     }
 
     public function desaprenderMagia()
@@ -99,18 +99,18 @@ class MagoMagiaController extends BaseController
         $magia = $this->magiaModel->getById($data['magia_id']);
 
         if (!$mago || !$magia || $mago->getGuildaId() !== $guilda->getId()) {
-            $this->sendErrorResponse('Mago ou magia não encontrados, ou mago não pertence à sua guilda');
+            $this->sendErrorResponse('Mago ou magia não encontrados, ou mago não pertence à sua guilda', 404);
             return;
         }
 
         $magoMagia = $this->magoMagiaModel->getRelacao($data['mago_id'], $data['magia_id']);
         if (!$magoMagia) {
-            $this->sendErrorResponse('Mago não aprendeu essa magia');
+            $this->sendErrorResponse('Mago não aprendeu essa magia', 404);
             return;
         }
 
         $this->magoMagiaModel->delete($data['mago_id'], $data['magia_id']);
-        $this->sendSuccessResponse('Magia desaprendida com sucesso');
+        $this->sendSuccessResponse('Magia desaprendida com sucesso', null, 204);
     }
 
     public function listarMagiasdoMago()
@@ -127,7 +127,7 @@ class MagoMagiaController extends BaseController
         $mago = $this->magoModel->getById($data['mago_id']);
 
         if (!$mago || $mago->getGuildaId() !== $guilda->getId()) {
-            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda');
+            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda', 404);
             return;
         }
 
@@ -137,7 +137,7 @@ class MagoMagiaController extends BaseController
             $magiasArray[] = $magia->toArray();
         }
 
-        $this->sendSuccessResponse('Magias do mago listadas com sucesso', $magiasArray);
+        $this->sendSuccessResponse('Magias do mago listadas com sucesso', $magiasArray, 200);
     }
 }
 

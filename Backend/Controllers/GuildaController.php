@@ -25,7 +25,7 @@ class GuildaController extends BaseController {
 
         $this->guildaModel->create($guilda);
 
-        $this->sendSuccessResponse('Guilda criada com sucesso', $guilda->toArray());
+        $this->sendSuccessResponse('Guilda criada com sucesso', $guilda->toArray(), 201);
     }
 
     public function getGuilda(){
@@ -33,7 +33,7 @@ class GuildaController extends BaseController {
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
 
@@ -46,7 +46,7 @@ class GuildaController extends BaseController {
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
 
@@ -65,7 +65,7 @@ class GuildaController extends BaseController {
 
         $this->guildaModel->update($guilda);
 
-        $this->sendSuccessResponse('Guilda atualizada com sucesso', $guilda->toArray());
+        $this->sendSuccessResponse('Guilda atualizada com sucesso', $guilda->toArray(), 201);
     }
 
     public function excluirGuilda(){
@@ -73,13 +73,13 @@ class GuildaController extends BaseController {
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
 
         $this->guildaModel->delete($guilda->getId());
 
-        $this->sendSuccessResponse('Guilda excluída com sucesso');
+        $this->sendSuccessResponse('Guilda excluída com sucesso', null, 204);
     }
 
 }

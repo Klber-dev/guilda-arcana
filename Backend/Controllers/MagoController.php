@@ -27,12 +27,12 @@ class MagoController extends BaseController
 
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
 
         if ($guilda->getEspaco() <= 0) {
-            $this->sendErrorResponse('Sua guilda não tem espaço para mais magos');
+            $this->sendErrorResponse('Sua guilda não tem espaço para mais magos', 409);
             return;
         }
 
@@ -41,7 +41,7 @@ class MagoController extends BaseController
         $this->guildaModel->update($guilda);
 
         $this->magoModel->create($mago);
-        $this->sendSuccessResponse('Mago criado com sucesso', $mago->toArray());
+        $this->sendSuccessResponse('Mago criado com sucesso', $mago->toArray(), 201);
     }
 
     public function apagarMago()
@@ -60,14 +60,14 @@ class MagoController extends BaseController
         $mago = $this->magoModel->getById($data['id']);
 
         if (!$mago || $mago->getGuildaId() !== $guilda->getId()) {
-            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda');
+            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda', 404);
             return;
         }
 
         $this->magoModel->delete($data['id']);
         $guilda->setEspaco($guilda->getEspaco() + 1);
         $this->guildaModel->update($guilda);
-        $this->sendSuccessResponse('Mago apagado com sucesso');
+        $this->sendSuccessResponse('Mago apagado com sucesso', null, 204);
     }
 
     public function getMagos()
@@ -76,7 +76,7 @@ class MagoController extends BaseController
         $this->exigirLogin();
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
         $magos = $this->magoModel->getByGuildaId($guilda->getId());
@@ -100,20 +100,20 @@ class MagoController extends BaseController
         $guilda = $this->guildaModel->getByUsuarioId($usuarioLogado);
 
         if (!$guilda) {
-            $this->sendErrorResponse('Guilda não encontrada');
+            $this->sendErrorResponse('Guilda não encontrada', 404);
             return;
         }
 
         $mago = $this->magoModel->getById((int) $data['id']);
 
         if (!$mago || $mago->getGuildaId() !== $guilda->getId()) {
-            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda');
+            $this->sendErrorResponse('Mago não encontrado ou não pertence à sua guilda', 404);
             return;
         }
 
         $this->magoModel->updateNivel((int) $data['id'], (int) $data['nivel']);
 
-        $this->sendSuccessResponse('Nível do mago atualizado com sucesso');
+        $this->sendSuccessResponse('Nível do mago atualizado com sucesso', null, 204);
     }
 }
 
