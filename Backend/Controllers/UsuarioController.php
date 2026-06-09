@@ -29,14 +29,14 @@ class UsuarioController extends BaseController
 
         // Verifica se o login já existe
         if ($this->usuarioModel->getByLogin($data['login'])){
-            $this->sendErrorResponse('Login já existe');
+            $this->sendErrorResponse('Login já existe', 409);
             return;
         }
 
         // Salva o usuário no banco de dados
         $this->usuarioModel->create($usuario);
         $_SESSION['usuario_id'] = $usuario->getId(); // Armazena o ID do usuário na sessão
-        $this->sendSuccessResponse('Usuário cadastrado com sucesso', $usuario->toArray());
+        $this->sendSuccessResponse('Usuário cadastrado com sucesso', $usuario->toArray(), 201);
     }
 
     public function autenticarUsuario()
@@ -65,10 +65,10 @@ class UsuarioController extends BaseController
         $data = $this->getJsonInput();
         $usuario = $this->usuarioModel->getById($usuarioLogado);
         if (!$usuario) {
-            $this->sendErrorResponse('Usuário não encontrado');
+            $this->sendErrorResponse('Usuário não encontrado', 404);
             return;
         }
-
+    
         if (isset($data['nome'])) {
             $usuario->setNome($data['nome']);
         }
@@ -76,7 +76,7 @@ class UsuarioController extends BaseController
             $usuario->setSenha(password_hash($data['senha'], PASSWORD_DEFAULT));
         }
         $this->usuarioModel->update($usuario);
-        $this->sendSuccessResponse('Perfil atualizado com sucesso', $usuario->toArray());
+        $this->sendSuccessResponse('Perfil atualizado com sucesso', $usuario->toArray(), 201);
 
 
     }
@@ -87,11 +87,11 @@ class UsuarioController extends BaseController
         $data = $this->getJsonInput();
         $usuario = $this->usuarioModel->getById($usuarioLogado);
         if (!$usuario) {
-            $this->sendErrorResponse('Usuário não encontrado');
+            $this->sendErrorResponse('Usuário não encontrado', 404);
             return;
         }
         $this->usuarioModel->delete($usuarioLogado);
-        $this->sendSuccessResponse('Usuário excluído com sucesso');
+        $this->sendSuccessResponse('Usuário excluído com sucesso', null, 204);
 
         unset($_SESSION['usuario_id']);
         session_destroy();
@@ -100,7 +100,7 @@ class UsuarioController extends BaseController
     public function logout(){
         unset($_SESSION['usuario_id']);
         session_destroy();
-        $this->sendSuccessResponse('Logout realizado com sucesso');
+        $this->sendSuccessResponse('Logout realizado com sucesso', null, 204);
     }
 }
 

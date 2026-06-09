@@ -34,7 +34,7 @@ class BaseController {
 
     protected function sendSuccessResponse(
         string $message,
-        array $data = [],
+        ?array $data = [],
         int $httpCode = 200
     ): void {
         $response = [
