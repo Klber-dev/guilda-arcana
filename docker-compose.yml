@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mariadb:latest
+
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: guilda_arcana
+      MARIADB_USER: kleber
+      MARIADB_PASSWORD: root
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./Database:/docker-entrypoint-initdb.d
+
+  backend:
+    build:
+      context: ./Backend
+
+    ports:
+      - "8080:80"
+
+    volumes:
+      - ./Backend:/var/www/html
+
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./Frontend
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ./Frontend:/app
+
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
