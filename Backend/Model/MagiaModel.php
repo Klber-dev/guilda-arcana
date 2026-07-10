@@ -73,4 +73,3 @@ class MagiaModel extends BaseModel {
 //Aqui, a magia ainda não se relaciona com ninguém e é um dado bruto que pode ser usado para criar uma relação com um mago dps
 //A ideia é pegar da API e salvar só o index da magia e o nivel pra regras de negócio. Com isso, a gente tem a magia salva e pode relacionar com os magos depois, sem precisar ficar buscando na API toda hora
 ?>
-
