@@ -3,6 +3,11 @@
 require_once __DIR__ . '/../Config/headers.php';
 require_once __DIR__ . '/../Config/autoload.php';
 require_once __DIR__ . '/../Config/env.php';
+session_set_cookie_params([
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
 session_start();
 
 $databaseConfig = getDatabaseConfig();
