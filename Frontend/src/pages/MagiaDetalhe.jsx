@@ -62,6 +62,118 @@ function MagiaDetalhe() {
     carregarDados();
   }, [index, navigate]);
 
+  function renderTextoFormatado(texto) {
+    if (typeof texto !== "string") {
+      return texto;
+    }
+
+    const linhas = texto.split("\n");
+
+    return linhas.map((linha, linhaIndex) => {
+      const partes = [];
+      let textoNormal = "";
+      let estiloAtual = null;
+      let indice = 0;
+
+      const adicionarTextoNormal = () => {
+        if (textoNormal) {
+          partes.push(
+            <span key={`${linhaIndex}-${partes.length}`}>{textoNormal}</span>
+          );
+          textoNormal = "";
+        }
+      };
+
+      const fecharEstilo = () => {
+        if (textoNormal) {
+          if (estiloAtual === "simples") {
+            partes.push(
+              <em key={`${linhaIndex}-${partes.length}`}>{textoNormal}</em>
+            );
+          } else {
+            partes.push(
+              <strong key={`${linhaIndex}-${partes.length}`}>{textoNormal}</strong>
+            );
+          }
+          textoNormal = "";
+        }
+        estiloAtual = null;
+      };
+
+      while (indice < linha.length) {
+        const caractere = linha[indice];
+
+        if (caractere === "*") {
+          const proximo = linha[indice + 1];
+          const proximo2 = linha[indice + 2];
+
+          if (proximo === "*" && proximo2 === "*") {
+            if (estiloAtual === "triplo") {
+              fecharEstilo();
+              indice += 3;
+              continue;
+            }
+
+            adicionarTextoNormal();
+            estiloAtual = "triplo";
+            indice += 3;
+            continue;
+          }
+
+          if (proximo === "*") {
+            if (estiloAtual === "duplo") {
+              fecharEstilo();
+              indice += 2;
+              continue;
+            }
+
+            adicionarTextoNormal();
+            estiloAtual = "duplo";
+            indice += 2;
+            continue;
+          }
+
+          if (estiloAtual === "simples") {
+            fecharEstilo();
+            indice += 1;
+            continue;
+          }
+
+          adicionarTextoNormal();
+          estiloAtual = "simples";
+          indice += 1;
+          continue;
+        }
+
+        textoNormal += caractere;
+        indice += 1;
+      }
+
+      if (estiloAtual) {
+        if (estiloAtual === "simples") {
+          partes.push(
+            <em key={`${linhaIndex}-${partes.length}`}>{textoNormal}</em>
+          );
+        } else {
+          partes.push(
+            <strong key={`${linhaIndex}-${partes.length}`}>{textoNormal}</strong>
+          );
+        }
+      } else if (textoNormal) {
+        partes.push(
+          <span key={`${linhaIndex}-${partes.length}`}>{textoNormal}</span>
+        );
+      }
+
+      return (
+        <span key={linhaIndex}>
+          {linhaIndex > 0 && <br />}
+          {partes}
+        </span>
+      );
+    });
+  }
+
   function abrirModal() {
     setMensagemAcao("");
     setTipoMensagemAcao("");
@@ -259,7 +371,7 @@ function MagiaDetalhe() {
 
                 <div className="space-y-4 text-base leading-relaxed text-[#4d4058]">
                   {magia.desc?.map((texto, descIndex) => (
-                    <p key={descIndex}>{texto}</p>
+                    <p key={descIndex}>{renderTextoFormatado(texto)}</p>
                   ))}
                 </div>
 
@@ -271,7 +383,7 @@ function MagiaDetalhe() {
 
                     <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#4d4058]">
                       {magia.higher_level.map((texto, levelIndex) => (
-                        <p key={levelIndex}>{texto}</p>
+                        <p key={levelIndex}>{renderTextoFormatado(texto)}</p>
                       ))}
                     </div>
                   </section>
