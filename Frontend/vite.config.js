@@ -7,4 +7,12 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: ['guilda-arcana.up.railway.app', 'localhost']
+  },
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: ['guilda-arcana.up.railway.app', 'localhost']
+  }
 });
