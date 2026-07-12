@@ -2,18 +2,18 @@
 
 require_once __DIR__ . '/../Config/headers.php';
 require_once __DIR__ . '/../Config/autoload.php';
+require_once __DIR__ . '/../Config/env.php';
 session_start();
 
-//transforma as informações em um array associativo
-$config = parse_ini_file(__DIR__ . "/../config.env");
+$databaseConfig = getDatabaseConfig();
 
-$host = $config["DB_HOST"];
-$port = $config["DB_PORT"];
-$dbname = $config["DB_NAME"];
-$user = $config["DB_USER"];
-$password = $config["DB_PASS"];
+$host = $databaseConfig['host'];
+$port = $databaseConfig['port'];
+$dbname = $databaseConfig['dbname'];
+$user = $databaseConfig['user'];
+$password = $databaseConfig['password'];
 
-define("DEBUG", filter_var($config["DEBUG"] ?? false, FILTER_VALIDATE_BOOLEAN));
+define('DEBUG', getAppDebugFlag());
 
 $db = new Database($host, $port, $dbname, $user, $password);
 
