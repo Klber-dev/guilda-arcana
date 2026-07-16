@@ -1,5 +1,7 @@
 # Guilda Arcana
 
+**Aplicação:** https://guilda-arcana.up.railway.app
+
 ## Sobre o projeto
 
 **Guilda Arcana** é uma aplicação web com o objetivo de simular o gerenciamento de uma guilda, envolvendo usuários, guildas, magos e magias.
